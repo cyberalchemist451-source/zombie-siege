@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 import { useGameStore, SPELL_COOLDOWN_BASE, SpellType } from '@/lib/gameStore';
 
 const SPELL_META: Record<SpellType, { icon: string; label: string; key: string }> = {
-    fireball: { icon: '≡ƒöÑ', label: 'Fireball', key: '1' },
-    lightning: { icon: 'ΓÜí', label: 'Lightning', key: '2' },
-    frostbolt: { icon: 'Γ¥ä∩╕Å', label: 'Frostbolt', key: '3' },
-    shadowbolt: { icon: '≡ƒîæ', label: 'Shadowbolt', key: '4' },
+    fireball: { icon: '🔥', label: 'Fireball', key: '1' },
+    lightning: { icon: '⚡', label: 'Lightning', key: '2' },
+    frostbolt: { icon: '❄️', label: 'Frostbolt', key: '3' },
+    shadowbolt: { icon: '🌑', label: 'Shadowbolt', key: '4' },
 };
 
 const SPELLS: SpellType[] = ['fireball', 'lightning', 'frostbolt', 'shadowbolt'];
@@ -52,7 +52,7 @@ export default function GameHUD() {
             <div style={{ position: 'absolute', top: 18, left: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {/* HP Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, color: '#ff4444', fontWeight: 700, width: 20 }}>Γ¥ñ∩╕Å</span>
+                    <span style={{ fontSize: 14, color: '#ff4444', fontWeight: 700, width: 20 }}>❤️</span>
                     <div style={{ width: 180, height: 14, background: 'rgba(0,0,0,0.6)', borderRadius: 7, border: '1px solid #660000', overflow: 'hidden' }}>
                         <div style={{
                             width: `${hpPct * 100}%`,
@@ -67,7 +67,7 @@ export default function GameHUD() {
 
                 {/* XP Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, color: '#4488ff', fontWeight: 700, width: 20 }}>Γ£¿</span>
+                    <span style={{ fontSize: 14, color: '#4488ff', fontWeight: 700, width: 20 }}>✨</span>
                     <div style={{ width: 180, height: 10, background: 'rgba(0,0,0,0.6)', borderRadius: 5, border: '1px solid #224488', overflow: 'hidden' }}>
                         <div style={{
                             width: `${xpPct * 100}%`,
@@ -77,7 +77,7 @@ export default function GameHUD() {
                             borderRadius: 5,
                         }} />
                     </div>
-                    <span style={{ fontSize: 11, color: '#aaccff', minWidth: 55 }}>Lv {player.level} ┬╖ {player.xp}/100</span>
+                    <span style={{ fontSize: 11, color: '#aaccff', minWidth: 55 }}>Lv {player.level} · {player.xp}/100</span>
                 </div>
 
                 {/* Skill Points Badge */}
@@ -87,7 +87,7 @@ export default function GameHUD() {
                         background: 'rgba(255,200,0,0.15)', border: '1px solid #c8a000',
                         borderRadius: 8, padding: '3px 10px', maxWidth: 210,
                     }}>
-                        <span style={{ fontSize: 13 }}>Γ¡É</span>
+                        <span style={{ fontSize: 13 }}>⭐</span>
                         <span style={{ fontSize: 12, color: '#ffdd44', fontWeight: 700 }}>
                             {player.skillPoints} Skill Point{player.skillPoints !== 1 ? 's' : ''} available!
                         </span>
@@ -103,13 +103,13 @@ export default function GameHUD() {
             }}>
                 {wave.phase === 'resting' ? (
                     <>
-                        <div style={{ color: '#aaffaa', fontSize: 13, fontWeight: 700 }}>WAVE {wave.number} CLEARED ≡ƒÅå</div>
-                        <div style={{ color: '#ffcc88', fontSize: 12 }}>Next wave in {Math.ceil(wave.restTimer)}sΓÇª</div>
+                        <div style={{ color: '#aaffaa', fontSize: 13, fontWeight: 700 }}>WAVE {wave.number} CLEARED 🏆</div>
+                        <div style={{ color: '#ffcc88', fontSize: 12 }}>Next wave in {Math.ceil(wave.restTimer)}s…</div>
                     </>
                 ) : wave.phase === 'active' ? (
                     <>
-                        <div style={{ color: '#ff6622', fontSize: 14, fontWeight: 800, letterSpacing: 1 }}>ΓÜö WAVE {wave.number}</div>
-                        <div style={{ color: '#ffaaaa', fontSize: 12 }}>≡ƒºƒ {wave.zombiesRemaining} remaining</div>
+                        <div style={{ color: '#ff6622', fontSize: 14, fontWeight: 800, letterSpacing: 1 }}>⚔️ WAVE {wave.number}</div>
+                        <div style={{ color: '#ffaaaa', fontSize: 12 }}>🧟 {wave.zombiesRemaining} remaining</div>
                         {wave.pendingSpawns > 0 && (
                             <div style={{ color: '#ffcc66', fontSize: 11, marginTop: 1 }}>
                                 +{wave.pendingSpawns} incoming in {Math.ceil(wave.spawnBatchTimer)}s
@@ -117,7 +117,7 @@ export default function GameHUD() {
                         )}
                     </>
                 ) : wave.phase === 'waiting' ? (
-                    <div style={{ color: '#aaaaaa', fontSize: 13 }}>StartingΓÇª</div>
+                    <div style={{ color: '#aaaaaa', fontSize: 13 }}>Starting…</div>
                 ) : null}
             </div>
 
@@ -128,7 +128,7 @@ export default function GameHUD() {
                     background: 'rgba(0,0,0,0.6)', borderRadius: 8, padding: '5px 16px',
                     border: '1px solid #ffdd00', minWidth: 160, textAlign: 'center',
                 }}>
-                    <div style={{ color: '#ffdd00', fontSize: 12, fontWeight: 700 }}>≡ƒÄ» Target</div>
+                    <div style={{ color: '#ffdd00', fontSize: 12, fontWeight: 700 }}>🎯 Target</div>
                     <div style={{ width: 120, height: 8, background: '#330000', borderRadius: 4, margin: '4px auto', overflow: 'hidden' }}>
                         <div style={{
                             width: `${(targetedZombie.hp / targetedZombie.maxHp) * 100}%`,
@@ -172,7 +172,7 @@ export default function GameHUD() {
                                 <span style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 9, color: '#aaaaff', fontWeight: 700 }}>{meta.key}</span>
                                 {spellData.tier > 0 && (
                                     <span style={{ position: 'absolute', top: 2, right: 3, fontSize: 8, color: '#ffdd44' }}>
-                                        {'Γÿà'.repeat(Math.min(spellData.tier, 5))}
+                                        {'★'.repeat(Math.min(spellData.tier, 5))}
                                     </span>
                                 )}
                             </div>
@@ -185,7 +185,7 @@ export default function GameHUD() {
                     background: 'rgba(255,200,50,0.15)', border: '1px solid rgba(255,200,50,0.4)',
                     borderRadius: 10, padding: '4px 18px', display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                    <span style={{ fontSize: 20 }}>≡ƒÅ╣</span>
+                    <span style={{ fontSize: 20 }}>🏹</span>
                     <span style={{ color: '#ffcc44', fontSize: 12, fontWeight: 700 }}>Crossbow</span>
                     <span style={{ color: '#888', fontSize: 10 }}>Spd {player.speed.toFixed(1)}</span>
                 </div>
@@ -211,7 +211,7 @@ export default function GameHUD() {
                         transition: 'all 0.2s',
                     }}
                 >
-                    {gamePaused ? 'Γû╢ Resume' : 'ΓÅ╕ Pause'}
+                    {gamePaused ? '▶ Resume' : '⏸ Pause'}
                 </button>
                 {/* Skills */}
                 <button
@@ -226,7 +226,7 @@ export default function GameHUD() {
                         transition: 'all 0.2s',
                     }}
                 >
-                    {skillMenuOpen ? 'Γ£ò Close' : 'Γ¡É Skills'}{player.skillPoints > 0 ? ` (${player.skillPoints})` : ''}
+                    {skillMenuOpen ? 'Γ£ò Close' : '⭐ Skills'}{player.skillPoints > 0 ? ` (${player.skillPoints})` : ''}
                 </button>
             </div>
 
@@ -241,7 +241,7 @@ export default function GameHUD() {
                         background: 'rgba(10,10,30,0.95)', border: '1px solid rgba(100,130,255,0.4)',
                         borderRadius: 20, padding: '36px 60px', textAlign: 'center',
                     }}>
-                        <div style={{ fontSize: 44, marginBottom: 8 }}>ΓÅ╕</div>
+                        <div style={{ fontSize: 44, marginBottom: 8 }}>⏸</div>
                         <div style={{ color: '#aaccff', fontSize: 28, fontWeight: 900, letterSpacing: 2, marginBottom: 6 }}>PAUSED</div>
                         <div style={{ color: '#666', fontSize: 12, marginBottom: 24 }}>Press P or click Resume to continue</div>
                         <button
@@ -252,7 +252,7 @@ export default function GameHUD() {
                                 fontSize: 15, fontWeight: 700, cursor: 'pointer', pointerEvents: 'auto',
                             }}
                         >
-                            Γû╢ Resume
+                            ▶ Resume
                         </button>
                     </div>
                 </div>
@@ -269,10 +269,10 @@ export default function GameHUD() {
                         background: 'rgba(20,0,0,0.9)', border: '2px solid #880000',
                         borderRadius: 20, padding: '40px 60px', textAlign: 'center',
                     }}>
-                        <div style={{ fontSize: 52, marginBottom: 8 }}>≡ƒÆÇ</div>
+                        <div style={{ fontSize: 52, marginBottom: 8 }}>💀</div>
                         <div style={{ color: '#ff4444', fontSize: 32, fontWeight: 900, letterSpacing: 2, marginBottom: 8 }}>YOU DIED</div>
                         <div style={{ color: '#aaa', fontSize: 14, marginBottom: 24 }}>
-                            Survived to Wave {wave.number} ┬╖ Level {player.level}
+                            Survived to Wave {wave.number} · Level {player.level}
                         </div>
                         <button
                             onClick={() => useGameStore.getState().startGame()}
@@ -282,7 +282,7 @@ export default function GameHUD() {
                                 fontSize: 16, fontWeight: 700, cursor: 'pointer', pointerEvents: 'auto',
                             }}
                         >
-                            Γå║ Try Again
+                            ↺ Try Again
                         </button>
                     </div>
                 </div>
@@ -290,3 +290,4 @@ export default function GameHUD() {
         </div>
     );
 }
+
