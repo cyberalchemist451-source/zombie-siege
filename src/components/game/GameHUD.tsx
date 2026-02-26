@@ -95,7 +95,7 @@ export default function GameHUD() {
                 )}
             </div>
 
-            {/* ΓöÇΓöÇ TOP CENTER: Wave Info ΓöÇΓöÇ */}
+            {/* TOP CENTER: Wave Info */}
             <div style={{
                 position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)',
                 background: 'rgba(0,0,0,0.55)', borderRadius: 10, padding: '6px 20px',
@@ -121,7 +121,7 @@ export default function GameHUD() {
                 ) : null}
             </div>
 
-            {/* ΓöÇΓöÇ TARGET INFO (center-ish, below wave) ΓöÇΓöÇ */}
+            {/* TARGET INFO (center-ish, below wave) */}
             {targetedZombie && (
                 <div style={{
                     position: 'absolute', top: 80, left: '50%', transform: 'translateX(-50%)',
@@ -141,7 +141,7 @@ export default function GameHUD() {
                 </div>
             )}
 
-            {/* ΓöÇΓöÇ BOTTOM CENTER: Spells + crossbow indicator ΓöÇΓöÇ */}
+            {/* BOTTOM CENTER: Spells + crossbow indicator */}
             <div style={{
                 position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
@@ -196,7 +196,7 @@ export default function GameHUD() {
                 </div>
             </div>
 
-            {/* ΓöÇΓöÇ TOP RIGHT: Skill Menu + Pause buttons ΓöÇΓöÇ */}
+            {/* TOP RIGHT: Skill Menu + Pause buttons */}
             <div style={{ position: 'absolute', top: 18, right: 18, display: 'flex', gap: 8, pointerEvents: 'auto' }}>
                 {/* Pause */}
                 <button
@@ -226,11 +226,11 @@ export default function GameHUD() {
                         transition: 'all 0.2s',
                     }}
                 >
-                    {skillMenuOpen ? 'Γ£ò Close' : '⭐ Skills'}{player.skillPoints > 0 ? ` (${player.skillPoints})` : ''}
+                    {skillMenuOpen ? '✕ Close' : '⭐ Skills'}{player.skillPoints > 0 ? ` (${player.skillPoints})` : ''}
                 </button>
             </div>
 
-            {/* ΓöÇΓöÇ PAUSED OVERLAY ΓöÇΓöÇ */}
+            {/* PAUSED OVERLAY */}
             {gamePaused && !gameOver && (
                 <div style={{
                     position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column',
