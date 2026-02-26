@@ -22,7 +22,7 @@ function StartScreen() {
             zIndex: 200,
         }}>
             <div style={{ textAlign: 'center', maxWidth: 560 }}>
-                <div style={{ fontSize: 64, marginBottom: 8 }}>≡ƒºƒ</div>
+                <div style={{ fontSize: 64, marginBottom: 8 }}>💀</div>
                 <h1 style={{
                     color: '#ff4422', fontSize: 42, fontWeight: 900, margin: '0 0 6px',
                     textShadow: '0 0 30px rgba(255,50,0,0.5)',
@@ -79,7 +79,7 @@ function StartScreen() {
                     onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
                     onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                    Γû╢ Begin Siege
+                    ▶ Begin Siege
                 </button>
             </div>
         </div>
