@@ -9,7 +9,7 @@ import Terrain, { getTerrainHeight } from '@/components/simulation/Terrain';
 import PlayerAvatar from './PlayerAvatar';
 import ZombieEntity from './ZombieEntity';
 import ZombieWaveManager from './ZombieWaveManager';
-import CaveSpawner from './CaveSpawner';
+import CastleSpawner from './CastleSpawner';
 import ProjectileSystem from './ProjectileSystem';
 import { Sky, Environment } from '@react-three/drei';
 
@@ -202,12 +202,6 @@ export default function GameScene() {
             <fog attach="fog" args={['#1a2035', 15, 80]} />
             <Environment preset="night" />
 
-            {/* Cave Backdrop Wall (2D stone wall behind cave to block void) */}
-            <mesh position={[-60, 10, -60]} rotation={[0, Math.PI / 4, 0]}>
-                <planeGeometry args={[120, 40]} />
-                <meshStandardMaterial color="#2d2d2d" roughness={0.9} />
-            </mesh>
-
             {/* Lighting — brighter diffuse for visibility without lag */}
             <ambientLight intensity={0.55} color="#445577" />
             <directionalLight
@@ -231,8 +225,8 @@ export default function GameScene() {
             <SceneryTrees />
             <SceneryRocks />
 
-            {/* Cave */}
-            <CaveSpawner />
+            {/* Castle */}
+            <CastleSpawner />
 
             {/* Player */}
             <PlayerAvatar />

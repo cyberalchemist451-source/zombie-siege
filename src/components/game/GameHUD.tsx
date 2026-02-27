@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useGameStore, SPELL_COOLDOWN_BASE, SpellType } from '@/lib/gameStore';
+import MobileControls from './MobileControls';
 
 const SPELL_META: Record<SpellType, { icon: string; label: string; key: string }> = {
     fireball: { icon: '🔥', label: 'Fireball', key: '1' },
@@ -309,6 +310,8 @@ export default function GameHUD() {
                     </div>
                 </div>
             )}
+
+            <MobileControls />
         </div>
     );
 }
