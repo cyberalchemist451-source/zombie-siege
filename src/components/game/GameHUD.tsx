@@ -62,8 +62,8 @@ export default function GameHUD() {
             <div style={{ position: 'absolute', top: 18, left: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {/* HP Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, color: '#ff4444', fontWeight: 700, width: 20 }}>❤️</span>
-                    <div style={{ width: 180, height: 14, background: 'rgba(0,0,0,0.6)', borderRadius: 7, border: '1px solid #660000', overflow: 'hidden' }}>
+                    <span style={{ fontSize: isTouch ? 12 : 14, color: '#ff4444', fontWeight: 700, width: isTouch ? 16 : 20 }}>❤️</span>
+                    <div style={{ width: isTouch ? 120 : 180, height: isTouch ? 10 : 14, background: 'rgba(0,0,0,0.6)', borderRadius: 7, border: '1px solid #660000', overflow: 'hidden' }}>
                         <div style={{
                             width: `${hpPct * 100}%`,
                             height: '100%',
@@ -77,8 +77,8 @@ export default function GameHUD() {
 
                 {/* XP Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, color: '#4488ff', fontWeight: 700, width: 20 }}>✨</span>
-                    <div style={{ width: 180, height: 10, background: 'rgba(0,0,0,0.6)', borderRadius: 5, border: '1px solid #224488', overflow: 'hidden' }}>
+                    <span style={{ fontSize: isTouch ? 12 : 14, color: '#4488ff', fontWeight: 700, width: isTouch ? 16 : 20 }}>✨</span>
+                    <div style={{ width: isTouch ? 120 : 180, height: isTouch ? 8 : 10, background: 'rgba(0,0,0,0.6)', borderRadius: 5, border: '1px solid #224488', overflow: 'hidden' }}>
                         <div style={{
                             width: `${xpPct * 100}%`,
                             height: '100%',
@@ -107,7 +107,7 @@ export default function GameHUD() {
 
             {/* TOP CENTER: Wave Info */}
             <div style={{
-                position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)',
+                position: 'absolute', top: isTouch ? 46 : 18, left: '50%', transform: 'translateX(-50%)',
                 background: 'rgba(0,0,0,0.55)', borderRadius: 10, padding: '6px 20px',
                 border: '1px solid rgba(255,100,0,0.4)', textAlign: 'center',
             }}>
@@ -156,69 +156,68 @@ export default function GameHUD() {
             )}
 
             {/* BOTTOM CENTER: Spells + crossbow indicator */}
-            <div style={{
-                position: 'absolute', bottom: isTouch ? 110 : 22, left: '50%',
-                transform: `translateX(-50%) ${isTouch ? 'scale(0.8)' : ''}`,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                transformOrigin: 'bottom center',
-                pointerEvents: isTouch ? 'none' : 'auto',
-            }}>
-                {/* Spell bar */}
-                <div style={{ display: 'flex', gap: 8 }}>
-                    {SPELLS.map(spell => {
-                        const meta = SPELL_META[spell];
-                        const spellData = player.spells[spell];
-                        const cd = player.spellCooldowns[spell];
-                        const maxCd = SPELL_COOLDOWN_BASE[spell];
-                        const locked = !spellData.unlocked;
-                        return (
-                            <div key={spell} style={{
-                                width: 54, height: 54, borderRadius: 10,
-                                background: locked ? 'rgba(0,0,0,0.5)' : 'rgba(20,30,60,0.75)',
-                                border: locked ? '1px solid #333' : `1px solid ${cd > 0 ? '#335' : '#4488ff'}`,
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                position: 'relative', overflow: 'hidden', opacity: locked ? 0.4 : 1,
-                            }}>
-                                {cd > 0 && !locked && (
-                                    <div style={{
-                                        position: 'absolute', bottom: 0, left: 0, right: 0,
-                                        height: `${(cd / maxCd) * 100}%`, background: 'rgba(0,0,0,0.6)'
-                                    }} />
-                                )}
-                                <span style={{ fontSize: 24, position: 'relative', zIndex: 1 }}>{meta.icon}</span>
-                                {!isTouch && (
-                                    <span style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 9, color: '#aaaaff', fontWeight: 700 }}>{meta.key}</span>
-                                )}
-                                {spellData.tier > 0 && (
-                                    <span style={{ position: 'absolute', top: 2, right: 3, fontSize: 8, color: '#ffdd44' }}>
-                                        {'★'.repeat(Math.min(spellData.tier, 5))}
-                                    </span>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Crossbow indicator */}
+            {!isTouch && (
                 <div style={{
-                    background: 'rgba(255,200,50,0.15)', border: '1px solid rgba(255,200,50,0.4)',
-                    borderRadius: 10, padding: '4px 18px', display: 'flex', alignItems: 'center', gap: 8,
+                    position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                 }}>
-                    <span style={{ fontSize: 20 }}>🏹</span>
-                    <span style={{ color: '#ffcc44', fontSize: 12, fontWeight: 700 }}>Crossbow</span>
-                    <span style={{ color: '#888', fontSize: 10 }}>Spd {player.speed.toFixed(1)}</span>
-                </div>
-
-                {/* Key hints */}
-                {!isTouch && (
-                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, letterSpacing: 0.5 }}>
-                        Tab: lock target &nbsp;|&nbsp; Esc: untarget &nbsp;|&nbsp; 1/2/3/4: spells &nbsp;|&nbsp; Click: shoot &nbsp;|&nbsp; C: camera lock &nbsp;|&nbsp; P: pause
+                    {/* Spell bar */}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        {SPELLS.map(spell => {
+                            const meta = SPELL_META[spell];
+                            const spellData = player.spells[spell];
+                            const cd = player.spellCooldowns[spell];
+                            const maxCd = SPELL_COOLDOWN_BASE[spell];
+                            const locked = !spellData.unlocked;
+                            return (
+                                <div key={spell} style={{
+                                    width: 54, height: 54, borderRadius: 10,
+                                    background: locked ? 'rgba(0,0,0,0.5)' : 'rgba(20,30,60,0.75)',
+                                    border: locked ? '1px solid #333' : `1px solid ${cd > 0 ? '#335' : '#4488ff'}`,
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                    position: 'relative', overflow: 'hidden', opacity: locked ? 0.4 : 1,
+                                }}>
+                                    {cd > 0 && !locked && (
+                                        <div style={{
+                                            position: 'absolute', bottom: 0, left: 0, right: 0,
+                                            height: `${(cd / maxCd) * 100}%`, background: 'rgba(0,0,0,0.6)'
+                                        }} />
+                                    )}
+                                    <span style={{ fontSize: 24, position: 'relative', zIndex: 1 }}>{meta.icon}</span>
+                                    {!isTouch && (
+                                        <span style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 9, color: '#aaaaff', fontWeight: 700 }}>{meta.key}</span>
+                                    )}
+                                    {spellData.tier > 0 && (
+                                        <span style={{ position: 'absolute', top: 2, right: 3, fontSize: 8, color: '#ffdd44' }}>
+                                            {'★'.repeat(Math.min(spellData.tier, 5))}
+                                        </span>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
-                )}
-            </div>
+
+                    {/* Crossbow indicator */}
+                    <div style={{
+                        background: 'rgba(255,200,50,0.15)', border: '1px solid rgba(255,200,50,0.4)',
+                        borderRadius: 10, padding: '4px 18px', display: 'flex', alignItems: 'center', gap: 8,
+                    }}>
+                        <span style={{ fontSize: 20 }}>🏹</span>
+                        <span style={{ color: '#ffcc44', fontSize: 12, fontWeight: 700 }}>Crossbow</span>
+                        <span style={{ color: '#888', fontSize: 10 }}>Spd {player.speed.toFixed(1)}</span>
+                    </div>
+
+                    {/* Key hints */}
+                    {!isTouch && (
+                        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, letterSpacing: 0.5 }}>
+                            Tab: lock target &nbsp;|&nbsp; Esc: untarget &nbsp;|&nbsp; 1/2/3/4: spells &nbsp;|&nbsp; Click: shoot &nbsp;|&nbsp; C: camera lock &nbsp;|&nbsp; P: pause
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* TOP RIGHT: Skill Menu + Pause buttons */}
-            <div style={{ position: 'absolute', top: 18, right: 18, display: 'flex', gap: 8, pointerEvents: 'auto' }}>
+            <div style={{ position: 'absolute', top: 18, right: 18, display: 'flex', flexDirection: isTouch ? 'column' : 'row', gap: 8, pointerEvents: 'auto' }}>
                 {/* Pause */}
                 <button
                     onClick={togglePause}
