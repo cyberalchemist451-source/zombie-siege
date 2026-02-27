@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore, SPELL_COOLDOWN_BASE, SpellType } from '@/lib/gameStore';
 import MobileControls from './MobileControls';
 
@@ -26,6 +26,13 @@ export default function GameHUD() {
     const useArrowKeys = useGameStore(s => s.useArrowKeys);
     const toggleArrowKeys = useGameStore(s => s.toggleArrowKeys);
     const togglePause = useGameStore(s => s.togglePause);
+
+    const [isTouch, setIsTouch] = useState(false);
+    useEffect(() => {
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            setIsTouch(true);
+        }
+    }, []);
 
     // Keyboard shortcut: P to pause/resume
     useEffect(() => {
@@ -150,8 +157,11 @@ export default function GameHUD() {
 
             {/* BOTTOM CENTER: Spells + crossbow indicator */}
             <div style={{
-                position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
+                position: 'absolute', bottom: isTouch ? 110 : 22, left: '50%',
+                transform: `translateX(-50%) ${isTouch ? 'scale(0.8)' : ''}`,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                transformOrigin: 'bottom center',
+                pointerEvents: isTouch ? 'none' : 'auto',
             }}>
                 {/* Spell bar */}
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -198,9 +208,11 @@ export default function GameHUD() {
                 </div>
 
                 {/* Key hints */}
-                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, letterSpacing: 0.5 }}>
-                    Tab: lock target &nbsp;|&nbsp; Esc: untarget &nbsp;|&nbsp; 1/2/3/4: spells &nbsp;|&nbsp; Click: shoot &nbsp;|&nbsp; C: camera lock &nbsp;|&nbsp; P: pause
-                </div>
+                {!isTouch && (
+                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, letterSpacing: 0.5 }}>
+                        Tab: lock target &nbsp;|&nbsp; Esc: untarget &nbsp;|&nbsp; 1/2/3/4: spells &nbsp;|&nbsp; Click: shoot &nbsp;|&nbsp; C: camera lock &nbsp;|&nbsp; P: pause
+                    </div>
+                )}
             </div>
 
             {/* TOP RIGHT: Skill Menu + Pause buttons */}
@@ -208,6 +220,7 @@ export default function GameHUD() {
                 {/* Pause */}
                 <button
                     onClick={togglePause}
+                    onTouchStart={(e) => { e.preventDefault(); togglePause(); }}
                     title="Pause / Resume (P)"
                     style={{
                         background: gamePaused ? 'rgba(255,200,0,0.2)' : 'rgba(0,0,0,0.6)',
@@ -223,6 +236,7 @@ export default function GameHUD() {
                 {/* Skills */}
                 <button
                     onClick={toggleSkillMenu}
+                    onTouchStart={(e) => { e.preventDefault(); toggleSkillMenu(); }}
                     style={{
                         background: player.skillPoints > 0 ? 'rgba(255,200,0,0.2)' : 'rgba(0,0,0,0.6)',
                         border: player.skillPoints > 0 ? '1px solid #ffcc00' : '1px solid rgba(255,255,255,0.2)',
@@ -238,20 +252,22 @@ export default function GameHUD() {
             </div>
 
             {/* ── BOTTOM RIGHT / ACCESSIBILITY ── */}
-            <div style={{ position: 'absolute', bottom: 18, right: 18, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
-                { /* Controls Toggle */}
-                <button
-                    onClick={toggleArrowKeys}
-                    style={{
-                        pointerEvents: 'auto', background: 'rgba(0,0,0,0.6)', border: '1px solid #444', color: '#aaa',
-                        borderRadius: 12, padding: '8px 12px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                        backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', gap: 6,
-                    }}
-                >
-                    <span style={{ fontSize: 14 }}>{useArrowKeys ? '⌨️' : '🎮'}</span>
-                    Movement: {useArrowKeys ? 'Arrow Keys' : 'WASD'}
-                </button>
-            </div>
+            {!isTouch && (
+                <div style={{ position: 'absolute', bottom: 18, right: 18, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+                    { /* Controls Toggle */}
+                    <button
+                        onClick={toggleArrowKeys}
+                        style={{
+                            pointerEvents: 'auto', background: 'rgba(0,0,0,0.6)', border: '1px solid #444', color: '#aaa',
+                            borderRadius: 12, padding: '8px 12px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', gap: 6,
+                        }}
+                    >
+                        <span style={{ fontSize: 14 }}>{useArrowKeys ? '⌨️' : '🎮'}</span>
+                        Movement: {useArrowKeys ? 'Arrow Keys' : 'WASD'}
+                    </button>
+                </div>
+            )}
 
             {/* PAUSED OVERLAY */}
             {gamePaused && !gameOver && (
@@ -269,6 +285,7 @@ export default function GameHUD() {
                         <div style={{ color: '#666', fontSize: 12, marginBottom: 24 }}>Press P or click Resume to continue</div>
                         <button
                             onClick={togglePause}
+                            onTouchStart={(e) => { e.preventDefault(); togglePause(); }}
                             style={{
                                 background: 'rgba(80,120,255,0.2)', border: '1px solid #4466cc',
                                 color: '#aaccff', borderRadius: 10, padding: '10px 30px',
@@ -299,6 +316,7 @@ export default function GameHUD() {
                         </div>
                         <button
                             onClick={() => useGameStore.getState().startGame()}
+                            onTouchStart={(e) => { e.preventDefault(); useGameStore.getState().startGame(); }}
                             style={{
                                 background: 'rgba(200,0,0,0.3)', border: '1px solid #cc0000',
                                 color: '#ff8888', borderRadius: 10, padding: '10px 30px',
