@@ -1,7 +1,7 @@
 ﻿import { create } from 'zustand';
 
 export type WeaponType = 'bow';
-export type ZombieType = 'normal' | 'brute' | 'boss';
+export type ZombieType = 'normal' | 'brute' | 'boss' | 'goose';
 export type SpellType = 'fireball' | 'lightning' | 'frostbolt' | 'shadowbolt';
 export type ZombieState = 'chasing' | 'attacking' | 'stunned' | 'dying' | 'dead';
 
@@ -32,16 +32,16 @@ export interface PlayerState {
 export interface ZombieData {
     id: string; position: Vec3; rotation: number;
     hp: number; maxHp: number; type: ZombieType; state: ZombieState;
-    stunTimer: number; slowTimer: number; attackCooldown: number;
+    stunTimer: number; slowTimer: number; attackCooldown: number; shootTimer: number;
     dotEffects: DotEffect[];
 }
 
 export interface ProjectileData {
     id: string;
-    type: 'arrow' | 'fireball' | 'lightning' | 'frostbolt' | 'shadowbolt';
+    type: 'arrow' | 'fireball' | 'lightning' | 'frostbolt' | 'shadowbolt' | 'boss_bolt';
     position: Vec3; direction: Vec3;
     speed: number; damage: number; ttl: number; hitRadius: number;
-    ownerId: 'player';
+    ownerId: 'player' | 'enemy';
     // Optional per-type extras
     aoeRadius?: number;      // fireball AOE damage (tier 3+)
     chainCount?: number;     // lightning chains (tier 3+)
@@ -92,7 +92,7 @@ export interface GameStore {
     removeDeadZombies: () => void;
 
     addProjectile: (p: Omit<ProjectileData, 'id'>) => void;
-    tickProjectiles: (dt: number) => void;
+    tickProjectiles: (dt: number, playerPos: Vec3) => void;
     addExplosion: (position: Vec3, radius: number, style?: 'fire' | 'shadow') => void;
     tickExplosions: (dt: number) => void;
     addLightningArc: (from: Vec3, to: Vec3) => void;
@@ -168,8 +168,10 @@ function makeSpawnEntries(count: number, brutes: number, waveNum: number): { pos
     return Array.from({ length: count }, (_, i) => {
         const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
         const radius = 3 + Math.random() * 7;
+        let type: ZombieType = i < brutes ? 'brute' : 'normal';
+        if (waveNum === 7) type = 'goose';
         return {
-            type: i < brutes ? 'brute' : 'normal',
+            type,
             position: { x: CAVE_POSITION.x + Math.cos(angle) * radius, y: 0, z: CAVE_POSITION.z + Math.sin(angle) * radius },
         };
     });
@@ -248,12 +250,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
             let hp = NORMAL_HP;
             if (e.type === 'brute') hp = BRUTE_HP;
             if (e.type === 'boss') hp = 2500 * Math.max(1, wave.number / 5);
+            if (e.type === 'goose') hp = NORMAL_HP * 1.5;
             return {
                 id: uid(), position: { ...e.position }, rotation: Math.random() * Math.PI * 2,
                 type: e.type,
                 hp,
                 maxHp: hp,
-                state: 'chasing', stunTimer: 0, slowTimer: 0, attackCooldown: 0, dotEffects: [],
+                state: 'chasing', stunTimer: 0, slowTimer: 0, attackCooldown: 0, shootTimer: 2.5 + Math.random(), dotEffects: [],
             };
         });
         set(s => ({
@@ -331,7 +334,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         const updated = zombies.map(zombie => {
             if (zombie.state === 'dying' || zombie.state === 'dead') return zombie;
-            let { stunTimer, slowTimer, attackCooldown, state, position, rotation, hp, dotEffects } = zombie;
+            let { stunTimer, slowTimer, attackCooldown, shootTimer, state, position, rotation, hp, dotEffects } = zombie;
 
             // Process DOT ticks
             let totalDotDmg = 0;
@@ -353,7 +356,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
             if (stunTimer > 0) stunTimer = Math.max(0, stunTimer - dt);
             if (slowTimer > 0) slowTimer = Math.max(0, slowTimer - dt);
             if (attackCooldown > 0) attackCooldown = Math.max(0, attackCooldown - dt);
-            if (stunTimer > 0) return { ...zombie, hp, dotEffects, stunTimer, slowTimer, attackCooldown, state: 'stunned' as ZombieState };
+            if (shootTimer > 0) shootTimer = Math.max(0, shootTimer - dt);
+
+            if (stunTimer > 0) return { ...zombie, hp, dotEffects, stunTimer, slowTimer, attackCooldown, shootTimer, state: 'stunned' as ZombieState };
 
             const dx = playerPos.x - position.x, dz = playerPos.z - position.z;
             const dist = Math.sqrt(dx * dx + dz * dz);
@@ -361,6 +366,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             let baseSpeed = NORMAL_SPD;
             if (zombie.type === 'brute') baseSpeed = BRUTE_SPD;
             if (zombie.type === 'boss') baseSpeed = 1.0;
+            if (zombie.type === 'goose') baseSpeed = 4.0;
             const spd = slowTimer > 0 ? baseSpeed * 0.5 : baseSpeed;
 
             if (dist > ATTACK_RANGE) {
@@ -375,6 +381,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 position = { x: position.x + (nx * spd + sx) * dt, y: position.y, z: position.z + (nz * spd + sz) * dt };
                 rotation = Math.atan2(nx, nz);
                 state = 'chasing';
+
+                // Boss shoots while chasing
+                if (zombie.type === 'boss' && shootTimer <= 0 && dist < 30) {
+                    shootTimer = 3.5;
+                    get().addProjectile({
+                        type: 'boss_bolt', position: { x: position.x, y: 1.8, z: position.z },
+                        direction: { x: nx, y: 0, z: nz },
+                        speed: 5.5, damage: 50, ttl: 8, hitRadius: 1.0, ownerId: 'enemy'
+                    });
+                }
             } else {
                 state = 'attacking';
                 if (attackCooldown <= 0) {
@@ -386,7 +402,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     get().damagePlayer(dmg);
                 }
             }
-            return { ...zombie, hp, dotEffects, position, rotation, stunTimer, slowTimer, attackCooldown, state };
+            return { ...zombie, hp, dotEffects, position, rotation, stunTimer, slowTimer, attackCooldown, shootTimer, state };
         });
 
         set({ zombies: updated });
@@ -406,7 +422,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     addProjectile: p => set(s => ({ projectiles: [...s.projectiles, { ...p, id: uid() }] })),
 
-    tickProjectiles: dt => {
+    tickProjectiles: (dt, playerPos) => {
         const { projectiles, zombies } = get();
         const removed = new Set<string>();
         type Hit = { id: string; amount: number; effect?: 'stun' | 'slow'; dot?: { dps: number; duration: number }; chainFrom?: Vec3; chainCount?: number; chillPos?: Vec3; chillRadius?: number; dotAoePos?: Vec3; dotAoeRadius?: number; dotDps?: number; dotDur?: number; explodeAt?: Vec3; explodeRadius?: number; explodeStyle?: 'fire' | 'shadow' };
@@ -419,6 +435,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 y: proj.position.y + proj.direction.y * proj.speed * dt - (proj.type === 'arrow' ? 0.5 * dt : 0),
                 z: proj.position.z + proj.direction.z * proj.speed * dt,
             };
+
+            // Handle enemy projectiles colliding with player
+            if (proj.ownerId === 'enemy') {
+                const ddx = pos.x - playerPos.x, ddz = pos.z - playerPos.z;
+                if (Math.sqrt(ddx * ddx + ddz * ddz) < proj.hitRadius) {
+                    removed.add(proj.id);
+                    get().damagePlayer(proj.damage);
+                    get().addExplosion(pos, Math.max(3.0, proj.hitRadius * 2), 'shadow');
+                }
+                return { ...proj, position: pos, ttl: proj.ttl - dt };
+            }
+
             for (const zombie of zombies) {
                 if (zombie.state === 'dying' || zombie.state === 'dead') continue;
                 const ddx = pos.x - zombie.position.x, ddz = pos.z - zombie.position.z;

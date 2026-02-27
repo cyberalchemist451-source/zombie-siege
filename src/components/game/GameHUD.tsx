@@ -63,7 +63,7 @@ export default function GameHUD() {
                 {/* HP Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: isTouch ? 12 : 14, color: '#ff4444', fontWeight: 700, width: isTouch ? 16 : 20 }}>❤️</span>
-                    <div style={{ width: isTouch ? 120 : 180, height: isTouch ? 10 : 14, background: 'rgba(0,0,0,0.6)', borderRadius: 7, border: '1px solid #660000', overflow: 'hidden' }}>
+                    <div style={{ width: isTouch ? 80 : 180, height: isTouch ? 6 : 14, background: 'rgba(0,0,0,0.6)', borderRadius: 7, border: '1px solid #660000', overflow: 'hidden' }}>
                         <div style={{
                             width: `${hpPct * 100}%`,
                             height: '100%',
@@ -78,7 +78,7 @@ export default function GameHUD() {
                 {/* XP Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: isTouch ? 12 : 14, color: '#4488ff', fontWeight: 700, width: isTouch ? 16 : 20 }}>✨</span>
-                    <div style={{ width: isTouch ? 120 : 180, height: isTouch ? 8 : 10, background: 'rgba(0,0,0,0.6)', borderRadius: 5, border: '1px solid #224488', overflow: 'hidden' }}>
+                    <div style={{ width: isTouch ? 80 : 180, height: isTouch ? 6 : 10, background: 'rgba(0,0,0,0.6)', borderRadius: 5, border: '1px solid #224488', overflow: 'hidden' }}>
                         <div style={{
                             width: `${xpPct * 100}%`,
                             height: '100%',
@@ -107,7 +107,7 @@ export default function GameHUD() {
 
             {/* TOP CENTER: Wave Info */}
             <div style={{
-                position: 'absolute', top: isTouch ? 46 : 18, left: '50%', transform: 'translateX(-50%)',
+                position: 'absolute', top: isTouch ? 66 : 18, left: '50%', transform: 'translateX(-50%)',
                 background: 'rgba(0,0,0,0.55)', borderRadius: 10, padding: '6px 20px',
                 border: '1px solid rgba(255,100,0,0.4)', textAlign: 'center',
             }}>

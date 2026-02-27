@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber';
 import { Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore, ProjectileData, ExplosionData, LightningArc } from '@/lib/gameStore';
+import { playerWorldPosition } from './PlayerAvatar';
 
 // ── Fireball ──────────────────────────────────────────────────────────────
 function Fireball({ proj }: { proj: ProjectileData }) {
@@ -55,6 +56,20 @@ function Arrow({ proj }: { proj: ProjectileData }) {
             <mesh rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.025, 0.025, 0.55, 4]} /><meshStandardMaterial color="#5a3a10" roughness={0.8} /></mesh>
             <mesh position={[0, 0, -0.30]} rotation={[Math.PI / 2, 0, 0]}><coneGeometry args={[0.04, 0.14, 4]} /><meshStandardMaterial color="#ccc" metalness={0.9} roughness={0.15} /></mesh>
             <mesh position={[0, 0, 0.26]} rotation={[Math.PI / 2, 0, 0]}><coneGeometry args={[0.055, 0.10, 3]} /><meshStandardMaterial color="#8b0000" roughness={0.9} /></mesh>
+        </group>
+    );
+}
+
+// ── Boss Bolt ────────────────────────────────────────────────────────────
+function BossBolt({ proj }: { proj: ProjectileData }) {
+    const meshRef = useRef<THREE.Mesh>(null);
+    useFrame(({ clock }) => {
+        if (meshRef.current) { meshRef.current.rotation.x -= 0.05; meshRef.current.rotation.z -= 0.05; meshRef.current.scale.setScalar(1.2 + Math.sin(clock.elapsedTime * 6) * 0.2); }
+    });
+    return (
+        <group position={[proj.position.x, proj.position.y, proj.position.z]}>
+            <mesh ref={meshRef}><octahedronGeometry args={[0.3, 0]} /><meshStandardMaterial color="#aa00ff" emissive="#cc33ff" emissiveIntensity={2.0} /></mesh>
+            <pointLight color="#dd66ff" intensity={5} distance={8} decay={2} />
         </group>
     );
 }
@@ -207,7 +222,7 @@ export default function ProjectileSystem() {
     useFrame((_, delta) => {
         const { gamePaused } = useGameStore.getState();
         if (gamePaused) return;
-        tickProjectiles(delta);
+        tickProjectiles(delta, playerWorldPosition);
         tickExplosions(delta);
         tickLightArcs(delta);
     });
@@ -219,6 +234,7 @@ export default function ProjectileSystem() {
                     case 'fireball': return <Fireball key={proj.id} proj={proj} />;
                     case 'frostbolt': return <Frostbolt key={proj.id} proj={proj} />;
                     case 'shadowbolt': return <Shadowbolt key={proj.id} proj={proj} />;
+                    case 'boss_bolt': return <BossBolt key={proj.id} proj={proj} />;
                     case 'arrow': return <Arrow key={proj.id} proj={proj} />;
                     case 'lightning': return <Lightning key={proj.id} proj={proj} />;
                     default: return null;

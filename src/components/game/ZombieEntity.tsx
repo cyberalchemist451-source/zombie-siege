@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -23,6 +23,31 @@ export default function ZombieEntity({ zombie }: Props) {
     const isTargeted = targetedZombieId === zombie.id;
     const isBrute = zombie.type === 'brute';
     const isBoss = zombie.type === 'boss';
+    const isGoose = zombie.type === 'goose';
+
+    // Honking logic for Geese
+    useEffect(() => {
+        if (!isGoose || zombie.state === 'dead' || zombie.state === 'dying') return;
+        const interval = setInterval(() => {
+            if (Math.random() > 0.6) {
+                try {
+                    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(550, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(350, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                } catch (e) { }
+            }
+        }, 2000 + Math.random() * 2500);
+        return () => clearInterval(interval);
+    }, [isGoose, zombie.state]);
 
     useFrame((state, delta) => {
         if (!groupRef.current) return;
@@ -46,12 +71,12 @@ export default function ZombieEntity({ zombie }: Props) {
 
         groupRef.current.rotation.z = isStunned ? Math.sin(t * 22) * 0.28 : 0;
 
-        const spd = zombie.slowTimer > 0 ? (isBoss ? 2 : 5) : (isBoss ? 2.5 : (isBrute ? 6 : 9));
+        const spd = zombie.slowTimer > 0 ? (isBoss ? 2 : (isGoose ? 3 : 5)) : (isBoss ? 2.5 : (isBrute ? 6 : (isGoose ? 11 : 9)));
         if (isChasing) {
             if (leftLegRef.current) leftLegRef.current.rotation.x = Math.sin(t * spd) * (isBoss ? 0.3 : 0.52);
             if (rightLegRef.current) rightLegRef.current.rotation.x = Math.sin(t * spd + Math.PI) * (isBoss ? 0.3 : 0.52);
-            if (leftArmRef.current) leftArmRef.current.rotation.x = (isBoss ? -0.8 : -1.5) + Math.sin(t * spd + 0.4) * 0.25;
-            if (rightArmRef.current) rightArmRef.current.rotation.x = (isBoss ? -0.8 : -1.5) + Math.sin(t * spd) * 0.25;
+            if (leftArmRef.current) leftArmRef.current.rotation.x = (isBoss ? -0.8 : (isGoose ? 0 : -1.5)) + Math.sin(t * spd + 0.4) * (isGoose ? 0.4 : 0.25);
+            if (rightArmRef.current) rightArmRef.current.rotation.x = (isBoss ? -0.8 : (isGoose ? 0 : -1.5)) + Math.sin(t * spd) * (isGoose ? 0.4 : 0.25);
             if (isBoss && groupRef.current) groupRef.current.rotation.z = Math.sin(t * spd * 0.5) * 0.08;
         } else if (isAttacking) {
             if (leftArmRef.current) leftArmRef.current.rotation.x = -1.8 + Math.sin(t * 7) * (isBoss ? 0.4 : 0.65);
@@ -75,10 +100,12 @@ export default function ZombieEntity({ zombie }: Props) {
     let skinColor = isFrosted ? '#4a9a7f' : '#4a7a3a';
     if (isBrute) skinColor = isFrosted ? '#3a7a6f' : '#3a5a20';
     if (isBoss) skinColor = isFrosted ? '#0f4f3f' : '#0a2a1a'; // Deep abyssal green
+    if (isGoose) skinColor = isFrosted ? '#aaccff' : '#ffffff'; // White goose
+    const beakColor = '#ff8800';
 
     const armorColor = isBrute ? '#2a1a08' : (isBoss ? '#05150c' : undefined);
-    const eyeColor = zombie.state === 'attacking' ? '#ff0000' : (isBoss ? '#aa00ff' : '#cc2200');
-    const modelScale = isBoss ? 2.8 : (isBrute ? 1.65 : 1.0);
+    const eyeColor = zombie.state === 'attacking' ? '#ff0000' : (isBoss ? '#aa00ff' : (isGoose ? '#000000' : '#cc2200'));
+    const modelScale = isBoss ? 2.8 : (isBrute ? 1.65 : (isGoose ? 0.8 : 1.0));
 
     return (
         <group ref={groupRef} scale={[modelScale, modelScale, modelScale]}>
@@ -106,9 +133,46 @@ export default function ZombieEntity({ zombie }: Props) {
                 </div>
                 {isBoss && <div style={{ textAlign: 'center', color: '#dd88ff', fontSize: 13, fontWeight: 900, marginTop: 2, letterSpacing: 2 }}>THE ABYSS</div>}
                 {isBrute && !isBoss && <div style={{ textAlign: 'center', color: '#ff6622', fontSize: 8, fontWeight: 800, marginTop: 1 }}>BRUTE</div>}
+                {isGoose && <div style={{ textAlign: 'center', color: '#ffffff', fontSize: 9, fontWeight: 800, marginTop: 1 }}>HONK</div>}
             </Html>
 
-            {isBoss ? (
+            {isGoose ? (
+                <>
+                    {/* Goose Body */}
+                    <mesh position={[0, 0.6, 0]} castShadow>
+                        <boxGeometry args={[0.35, 0.4, 0.6]} />
+                        <meshStandardMaterial color={skinColor} roughness={0.9} />
+                    </mesh>
+                    {/* Goose Tail */}
+                    <mesh position={[0, 0.65, -0.3]} rotation={[0.4, 0, 0]}>
+                        <coneGeometry args={[0.15, 0.4, 4]} />
+                        <meshStandardMaterial color={skinColor} roughness={0.9} />
+                    </mesh>
+                    {/* Goose Neck & Head */}
+                    <group position={[0, 0.8, 0.25]} rotation={[0.2, 0, 0]}>
+                        <mesh position={[0, 0.2, 0]} castShadow>
+                            <boxGeometry args={[0.15, 0.5, 0.15]} />
+                            <meshStandardMaterial color={skinColor} roughness={0.9} />
+                        </mesh>
+                        <mesh position={[0, 0.5, 0.05]} castShadow>
+                            <boxGeometry args={[0.2, 0.25, 0.25]} />
+                            <meshStandardMaterial color={skinColor} roughness={0.9} />
+                        </mesh>
+                        {/* Beak */}
+                        <mesh position={[0, 0.48, 0.25]} rotation={[1.5, 0, 0]} castShadow>
+                            <coneGeometry args={[0.08, 0.3, 4]} />
+                            <meshStandardMaterial color={beakColor} roughness={0.6} />
+                        </mesh>
+                        {/* Eyes */}
+                        {[-0.1, 0.1].map((ex, i) => (
+                            <mesh key={i} position={[ex, 0.55, 0.1]}>
+                                <sphereGeometry args={[0.03, 6, 6]} />
+                                <meshStandardMaterial color={eyeColor} />
+                            </mesh>
+                        ))}
+                    </group>
+                </>
+            ) : isBoss ? (
                 <>
                     {/* CTHULHU BOSS DESIGN */}
                     {/* Massive Bulbous Body */}
@@ -189,40 +253,40 @@ export default function ZombieEntity({ zombie }: Props) {
                     )}
                 </>
             )}
-            {/* Left arm */}
-            <group ref={leftArmRef} position={[-0.30, isBoss ? 1.4 : 0.88, 0]} rotation={[0, 0, 0.15]}>
+            {/* Left arm/wing */}
+            <group ref={leftArmRef} position={[-0.30, isBoss ? 1.4 : (isGoose ? 0.6 : 0.88), 0]} rotation={[0, 0, isGoose ? 0.3 : 0.15]}>
                 <mesh castShadow>
-                    <boxGeometry args={[isBoss ? 0.2 : 0.14, isBoss ? 0.8 : 0.55, isBoss ? 0.2 : 0.13]} />
+                    <boxGeometry args={[isBoss ? 0.2 : (isGoose ? 0.05 : 0.14), isBoss ? 0.8 : (isGoose ? 0.4 : 0.55), isBoss ? 0.2 : (isGoose ? 0.45 : 0.13)]} />
                     <meshStandardMaterial color={skinColor} roughness={0.88} />
                 </mesh>
-                <mesh position={[0, isBoss ? -0.4 : -0.30, 0]}>
+                {!isGoose && <mesh position={[0, isBoss ? -0.4 : -0.30, 0]}>
                     <boxGeometry args={[isBoss ? 0.22 : 0.15, isBoss ? 0.2 : 0.14, isBoss ? 0.12 : 0.08]} />
                     <meshStandardMaterial color={armorColor ?? '#3a5a2a'} roughness={0.9} />
-                </mesh>
+                </mesh>}
             </group>
-            {/* Right arm */}
-            <group ref={rightArmRef} position={[0.30, isBoss ? 1.4 : 0.88, 0]} rotation={[0, 0, -0.15]}>
+            {/* Right arm/wing */}
+            <group ref={rightArmRef} position={[0.30, isBoss ? 1.4 : (isGoose ? 0.6 : 0.88), 0]} rotation={[0, 0, isGoose ? -0.3 : -0.15]}>
                 <mesh castShadow>
-                    <boxGeometry args={[isBoss ? 0.2 : 0.14, isBoss ? 0.8 : 0.55, isBoss ? 0.2 : 0.13]} />
+                    <boxGeometry args={[isBoss ? 0.2 : (isGoose ? 0.05 : 0.14), isBoss ? 0.8 : (isGoose ? 0.4 : 0.55), isBoss ? 0.2 : (isGoose ? 0.45 : 0.13)]} />
                     <meshStandardMaterial color={skinColor} roughness={0.88} />
                 </mesh>
-                <mesh position={[0, isBoss ? -0.4 : -0.30, 0]}>
+                {!isGoose && <mesh position={[0, isBoss ? -0.4 : -0.30, 0]}>
                     <boxGeometry args={[isBoss ? 0.22 : 0.15, isBoss ? 0.2 : 0.14, isBoss ? 0.12 : 0.08]} />
                     <meshStandardMaterial color={armorColor ?? '#3a5a2a'} roughness={0.9} />
-                </mesh>
+                </mesh>}
             </group>
             {/* Left leg */}
-            <group ref={leftLegRef} position={[-0.15, isBoss ? 0.4 : 0.28, 0]}>
+            <group ref={leftLegRef} position={[-0.15, isBoss ? 0.4 : (isGoose ? 0.2 : 0.28), 0]}>
                 <mesh castShadow>
-                    <boxGeometry args={[isBoss ? 0.22 : 0.16, isBoss ? 0.8 : 0.60, isBoss ? 0.2 : 0.15]} />
-                    <meshStandardMaterial color={armorColor ?? '#2a3a1a'} roughness={0.9} />
+                    <boxGeometry args={[isBoss ? 0.22 : (isGoose ? 0.06 : 0.16), isBoss ? 0.8 : (isGoose ? 0.4 : 0.60), isBoss ? 0.2 : (isGoose ? 0.06 : 0.15)]} />
+                    <meshStandardMaterial color={isGoose ? beakColor : (armorColor ?? '#2a3a1a')} roughness={0.9} />
                 </mesh>
             </group>
             {/* Right leg */}
-            <group ref={rightLegRef} position={[0.15, isBoss ? 0.4 : 0.28, 0]}>
+            <group ref={rightLegRef} position={[0.15, isBoss ? 0.4 : (isGoose ? 0.2 : 0.28), 0]}>
                 <mesh castShadow>
-                    <boxGeometry args={[isBoss ? 0.22 : 0.16, isBoss ? 0.8 : 0.60, isBoss ? 0.2 : 0.15]} />
-                    <meshStandardMaterial color={armorColor ?? '#2a3a1a'} roughness={0.9} />
+                    <boxGeometry args={[isBoss ? 0.22 : (isGoose ? 0.06 : 0.16), isBoss ? 0.8 : (isGoose ? 0.4 : 0.60), isBoss ? 0.2 : (isGoose ? 0.06 : 0.15)]} />
+                    <meshStandardMaterial color={isGoose ? beakColor : (armorColor ?? '#2a3a1a')} roughness={0.9} />
                 </mesh>
             </group>
             {/* Frost slow overlay */}
