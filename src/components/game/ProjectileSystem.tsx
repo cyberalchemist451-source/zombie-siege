@@ -6,7 +6,7 @@ import { Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore, ProjectileData, ExplosionData, LightningArc } from '@/lib/gameStore';
 
-// ΓöÇΓöÇ Fireball ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Fireball ──────────────────────────────────────────────────────────────
 function Fireball({ proj }: { proj: ProjectileData }) {
     const meshRef = useRef<THREE.Mesh>(null);
     useFrame(({ clock }) => { if (meshRef.current) meshRef.current.scale.setScalar(1 + Math.sin(clock.elapsedTime * 14) * 0.14); });
@@ -18,7 +18,7 @@ function Fireball({ proj }: { proj: ProjectileData }) {
     );
 }
 
-// ΓöÇΓöÇ Frostbolt ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Frostbolt ─────────────────────────────────────────────────────────────
 function Frostbolt({ proj }: { proj: ProjectileData }) {
     const meshRef = useRef<THREE.Mesh>(null);
     useFrame(() => { if (meshRef.current) meshRef.current.rotation.z += 0.1; });
@@ -30,7 +30,7 @@ function Frostbolt({ proj }: { proj: ProjectileData }) {
     );
 }
 
-// ΓöÇΓöÇ Shadowbolt ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Shadowbolt ────────────────────────────────────────────────────────────
 function Shadowbolt({ proj }: { proj: ProjectileData }) {
     const meshRef = useRef<THREE.Mesh>(null);
     const auraRef = useRef<THREE.Mesh>(null);
@@ -47,7 +47,7 @@ function Shadowbolt({ proj }: { proj: ProjectileData }) {
     );
 }
 
-// ΓöÇΓöÇ Arrow (crossbow bolt) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Arrow (crossbow bolt) ──────────────────────────────────────────────────
 function Arrow({ proj }: { proj: ProjectileData }) {
     const angle = Math.atan2(proj.direction.x, proj.direction.z);
     return (
@@ -59,7 +59,7 @@ function Arrow({ proj }: { proj: ProjectileData }) {
     );
 }
 
-// ΓöÇΓöÇ Lightning ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Lightning ─────────────────────────────────────────────────────────────
 function Lightning({ proj }: { proj: ProjectileData }) {
     return (
         <group position={[proj.position.x, proj.position.y, proj.position.z]}>
@@ -69,7 +69,7 @@ function Lightning({ proj }: { proj: ProjectileData }) {
     );
 }
 
-// ΓöÇΓöÇ Lightning Arc ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Lightning Arc ─────────────────────────────────────────────────────────
 // Pre-seeded jitter so points stay stable per-arc (not flickering every frame)
 function buildArcPoints(
     from: { x: number; y: number; z: number },
@@ -94,12 +94,12 @@ function buildArcPoints(
 }
 
 function LightningArcLine({ arc }: { arc: LightningArc }) {
-    const life = Math.max(0, arc.ttl / 0.5); // 0ΓåÆ1 fade out (ttl is 0.5s now)
+    const life = Math.max(0, arc.ttl / 0.5); // 0→1 fade out (ttl is 0.5s now)
     const seed = parseInt(arc.id.replace(/\D/g, '').slice(0, 8) || '12345');
 
     // Core jagged line (12 segments, heavy jitter)
     const core = buildArcPoints(arc.from, arc.to, 12, 0.65, seed);
-    // Glow fringe (8 segments, less jitter ΓÇö offset slightly)
+    // Glow fringe (8 segments, less jitter — offset slightly)
     const fringe = buildArcPoints(arc.from, arc.to, 8, 0.3, seed + 99);
 
     // Fork branch from midpoint
@@ -152,7 +152,7 @@ function LightningArcLine({ arc }: { arc: LightningArc }) {
     );
 }
 
-// ΓöÇΓöÇ Explosion ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Explosion ─────────────────────────────────────────────────────────────
 function Explosion({ exp }: { exp: ExplosionData }) {
     const p = exp.progress;
     const isShadow = exp.style === 'shadow';
@@ -195,7 +195,7 @@ function Explosion({ exp }: { exp: ExplosionData }) {
     );
 }
 
-// ΓöÇΓöÇ Main system ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Main system ───────────────────────────────────────────────────────────
 export default function ProjectileSystem() {
     const projectiles = useGameStore(s => s.projectiles);
     const explosions = useGameStore(s => s.explosions);
@@ -229,3 +229,4 @@ export default function ProjectileSystem() {
         </>
     );
 }
+

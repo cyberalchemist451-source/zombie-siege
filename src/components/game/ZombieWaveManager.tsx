@@ -24,7 +24,7 @@ export default function ZombieWaveManager() {
         // Tick zombie AI, passing current player position
         tickZombies(delta, playerWorldPosition);
 
-        // Wave timer (rest ΓåÆ next wave)
+        // Wave timer (rest → next wave)
         tickWaveTimer(delta);
 
         // Staggered batch spawner
@@ -58,5 +58,6 @@ export default function ZombieWaveManager() {
         checkWaveComplete();
     });
 
-    return null; // no visual output ΓÇö logic only
+    return null; // no visual output — logic only
 }
+

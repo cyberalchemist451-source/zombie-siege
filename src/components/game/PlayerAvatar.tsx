@@ -33,6 +33,8 @@ export default function PlayerAvatar() {
     const attackTimer = useRef(0);
     const isMoving = useRef(false);
     const landTimer = useRef(0);
+    const lastJumpPress = useRef(false);
+    const jumpsCount = useRef(0);
 
     const setBlocking = useGameStore(s => s.setBlocking);
     const setSpellCooldown = useGameStore(s => s.setSpellCooldown);
@@ -40,7 +42,7 @@ export default function PlayerAvatar() {
     const tickSpellCooldowns = useGameStore(s => s.tickSpellCooldowns);
     const setTargetedZombie = useGameStore(s => s.setTargetedZombie);
 
-    // ΓöÇΓöÇ Key handling ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Key handling ──────────────────────────────────────────────────────
     useEffect(() => {
         const handleDown = (e: KeyboardEvent) => {
             const key = e.key.toLowerCase();
@@ -70,7 +72,7 @@ export default function PlayerAvatar() {
         };
     }, [setTargetedZombie]);
 
-    // ΓöÇΓöÇ Attack click (crossbow) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Attack click (crossbow) ───────────────────────────────────────────
     useEffect(() => {
         const handleClick = () => {
             const { player, gameRunning, skillMenuOpen, zombies, targetedZombieId,
@@ -102,7 +104,7 @@ export default function PlayerAvatar() {
         return () => window.removeEventListener('click', handleClick);
     }, [addProjectile]);
 
-    // ΓöÇΓöÇ Spells 1/2/3 ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Spells 1/2/3 ─────────────────────────────────────────────────────
     const castSpell = useCallback((spell: SpellType) => {
         if (!groupRef.current) return;
         const { player, gameRunning, skillMenuOpen, zombies, targetedZombieId } = useGameStore.getState();
@@ -152,7 +154,7 @@ export default function PlayerAvatar() {
         return () => window.removeEventListener('keydown', h);
     }, [castSpell]);
 
-    // ΓöÇΓöÇ Frame loop ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Frame loop ────────────────────────────────────────────────────────
     useFrame((state, delta) => {
         if (!groupRef.current) return;
         const { player, gameRunning, gameOver } = useGameStore.getState();
@@ -165,15 +167,29 @@ export default function PlayerAvatar() {
 
         setBlocking(false); // crossbow-only: no blocking
 
+        const useArrowKeys = useGameStore.getState().useArrowKeys;
+
         const sprint = keys.current.has('shift');
         const walkSpeed = player.speed ?? 4;
         const speed = sprint ? walkSpeed * 2 : walkSpeed;
-        const fwdKey = keys.current.has('w') || keys.current.has('arrowup');
-        const backKey = keys.current.has('s') || keys.current.has('arrowdown');
-        const strafeL = keys.current.has('q');
-        const strafeR = keys.current.has('e');
-        const turnL = keys.current.has('a') || keys.current.has('arrowleft');
-        const turnR = keys.current.has('d') || keys.current.has('arrowright');
+
+        let fwdKey, backKey, strafeL, strafeR, turnL, turnR;
+
+        if (useArrowKeys) {
+            fwdKey = keys.current.has('arrowup');
+            backKey = keys.current.has('arrowdown');
+            strafeL = keys.current.has(','); // comma for left strafe
+            strafeR = keys.current.has('.'); // period for right strafe
+            turnL = keys.current.has('arrowleft');
+            turnR = keys.current.has('arrowright');
+        } else {
+            fwdKey = keys.current.has('w');
+            backKey = keys.current.has('s');
+            strafeL = keys.current.has('q');
+            strafeR = keys.current.has('e');
+            turnL = keys.current.has('a');
+            turnR = keys.current.has('d');
+        }
 
         let dx = 0, dz = 0;
         if (fwdKey) dz += 1;
@@ -206,23 +222,44 @@ export default function PlayerAvatar() {
 
         const GRAVITY = 18.0;
         const jump = keys.current.has('space');
-        if (jump && isGrounded.current) { velocity.current.y = 8.0; isGrounded.current = false; }
+        const jumpPressed = jump && !lastJumpPress.current;
+        lastJumpPress.current = jump;
+
+        const canDoubleJump = (player.upgrades.speed ?? 0) >= 5;
+
         velocity.current.y -= GRAVITY * delta;
         position.current.y += velocity.current.y * delta;
         const terrainY = getTerrainHeight(position.current.x, position.current.z, environment.terrain.seed, environment.terrain.heightScale);
+
         if (position.current.y <= terrainY) {
             if (!isGrounded.current && velocity.current.y < -3) landTimer.current = 0.15;
             position.current.y = terrainY;
             velocity.current.y = 0;
             isGrounded.current = true;
-        } else { isGrounded.current = false; }
+            jumpsCount.current = 0;
+        } else {
+            isGrounded.current = false;
+        }
+
+        if (jumpPressed) {
+            if (isGrounded.current) {
+                velocity.current.y = 8.0;
+                isGrounded.current = false;
+                jumpsCount.current = 1;
+            } else if (canDoubleJump && jumpsCount.current < 2) {
+                velocity.current.y = 7.0;
+                jumpsCount.current = 2;
+                if (leftThighRef.current) { leftThighRef.current.rotation.x = 0.6; leftThighRef.current.rotation.z = -0.08; }
+                if (rightThighRef.current) { rightThighRef.current.rotation.x = 0.6; rightThighRef.current.rotation.z = 0.08; }
+            }
+        }
 
         groupRef.current.position.copy(position.current);
         playerWorldPosition.x = position.current.x;
         playerWorldPosition.y = position.current.y;
         playerWorldPosition.z = position.current.z;
 
-        // Auto-face target ΓÇö normalized diff prevents 180┬░ flip
+        // Auto-face target — normalized diff prevents 180° flip
         const { targetedZombieId, zombies } = useGameStore.getState();
         if (targetedZombieId) {
             const tgt = zombies.find(z => z.id === targetedZombieId);
@@ -237,7 +274,7 @@ export default function PlayerAvatar() {
             }
         }
 
-        // ΓöÇΓöÇ Animations ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Animations ─────────────────────────────────────────────────
         const t = state.clock.elapsedTime;
         const ws = sprint ? 14 : 7;
         const LT = leftThighRef.current, RT = rightThighRef.current;
@@ -289,7 +326,7 @@ export default function PlayerAvatar() {
     return (
         <group ref={groupRef} name="playerAvatar">
 
-            {/* ΓöÇΓöÇ TORSO + HELM ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── TORSO + HELM ─────────────────────────────────────── */}
             <group ref={torsoRef} position={[0, 0, 0]}>
                 <mesh position={[0, 1.05, 0]} castShadow><boxGeometry args={[0.52, 0.68, 0.32]} /><meshStandardMaterial {...PLATE} /></mesh>
                 <mesh position={[0, 1.15, 0.17]}><boxGeometry args={[0.14, 0.28, 0.04]} /><meshStandardMaterial {...GOLD} /></mesh>
@@ -310,7 +347,7 @@ export default function PlayerAvatar() {
                 ))}
             </group>
 
-            {/* ΓöÇΓöÇ LEFT ARM ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── LEFT ARM ─────────────────────────────────────────── */}
             <group ref={leftArmRef} position={[-0.34, 1.18, 0]}>
                 <mesh position={[0, 0.08, 0]} castShadow><sphereGeometry args={[0.14, 8, 6]} /><meshStandardMaterial {...PLATE} /></mesh>
                 <mesh position={[0, 0.01, 0]}><cylinderGeometry args={[0.12, 0.10, 0.08, 8]} /><meshStandardMaterial {...GOLD} /></mesh>
@@ -319,7 +356,7 @@ export default function PlayerAvatar() {
                 <mesh position={[0, -0.60, 0]}><boxGeometry args={[0.12, 0.12, 0.10]} /><meshStandardMaterial {...PLATE} /></mesh>
             </group>
 
-            {/* ΓöÇΓöÇ RIGHT ARM + CROSSBOW ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── RIGHT ARM + CROSSBOW ─────────────────────────────── */}
             <group ref={rightArmRef} position={[0.34, 1.18, 0]}>
                 <mesh position={[0, 0.08, 0]} castShadow><sphereGeometry args={[0.14, 8, 6]} /><meshStandardMaterial {...PLATE} /></mesh>
                 <mesh position={[0, 0.01, 0]}><cylinderGeometry args={[0.12, 0.10, 0.08, 8]} /><meshStandardMaterial {...GOLD} /></mesh>
@@ -336,7 +373,7 @@ export default function PlayerAvatar() {
                 </group>
             </group>
 
-            {/* ΓöÇΓöÇ AVIAN LEFT LEG ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── AVIAN LEFT LEG ───────────────────────────────────── */}
             <group ref={leftThighRef} position={[-0.14, 0.58, 0]} rotation={[0.25, 0, -0.08]}>
                 <mesh position={[0, -0.13, 0]} castShadow><boxGeometry args={[0.17, 0.30, 0.19]} /><meshStandardMaterial {...PLATE} /></mesh>
                 <mesh position={[0, -0.30, 0.06]}><cylinderGeometry args={[0.09, 0.08, 0.06, 8]} /><meshStandardMaterial {...PLATE_D} /></mesh>
@@ -353,7 +390,7 @@ export default function PlayerAvatar() {
                 </group>
             </group>
 
-            {/* ΓöÇΓöÇ AVIAN RIGHT LEG ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── AVIAN RIGHT LEG ──────────────────────────────────── */}
             <group ref={rightThighRef} position={[0.14, 0.58, 0]} rotation={[0.25, 0, 0.08]}>
                 <mesh position={[0, -0.13, 0]} castShadow><boxGeometry args={[0.17, 0.30, 0.19]} /><meshStandardMaterial {...PLATE} /></mesh>
                 <mesh position={[0, -0.30, 0.06]}><cylinderGeometry args={[0.09, 0.08, 0.06, 8]} /><meshStandardMaterial {...PLATE_D} /></mesh>
@@ -372,3 +409,4 @@ export default function PlayerAvatar() {
         </group>
     );
 }
+

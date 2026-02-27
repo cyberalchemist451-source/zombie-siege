@@ -93,7 +93,7 @@ export default function UndeadSiegePage() {
 
     return (
         <div style={{ width: '100vw', height: '100vh', background: '#000', overflow: 'hidden' }}>
-            {/* 3D Canvas ΓÇö always mounted to avoid remounting all components */}
+            {/* 3D Canvas — always mounted to avoid remounting all components */}
             <div style={{ position: 'absolute', inset: 0, opacity: showScene ? 1 : 0, transition: 'opacity 0.5s' }}>
                 <Canvas
                     shadows
@@ -117,3 +117,4 @@ export default function UndeadSiegePage() {
         </div>
     );
 }
+
