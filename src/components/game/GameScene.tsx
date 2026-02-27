@@ -97,7 +97,7 @@ function GameCamera() {
         }
 
         // Compute effective world yaw
-        // ╧Ç offset: zero relative angle ΓåÆ directly BEHIND a player facing +Z
+        // ╧Ç offset: zero relative angle → directly BEHIND a player facing +Z
         const worldYaw = locked.current
             ? playerYaw + Math.PI + cameraRelativeH.current
             : absoluteWorldYaw.current;
@@ -112,7 +112,7 @@ function GameCamera() {
             avatarPos.z + Math.cos(worldYaw) * dist * cosV,
         );
 
-        // Strict follow ΓÇö lerp closer to 1 = snappier
+        // Strict follow — lerp closer to 1 = snappier
         state.camera.position.lerp(targetPos, 0.18);
 
         // Prevent clipping into terrain
@@ -188,11 +188,21 @@ export default function GameScene() {
 
     return (
         <group>
-            {/* Lighting ΓÇö darker/eerie atmosphere */}
-            <ambientLight intensity={0.25} color="#334466" />
+            {/* Environment / Sky / Fog */}
+            <color attach="background" args={['#1a2035']} />
+            <fog attach="fog" args={['#1a2035', 15, 80]} />
+
+            {/* Cave Backdrop Wall (2D stone wall behind cave to block void) */}
+            <mesh position={[-60, 10, -60]} rotation={[0, Math.PI / 4, 0]}>
+                <planeGeometry args={[120, 40]} />
+                <meshStandardMaterial color="#2d2d2d" roughness={0.9} />
+            </mesh>
+
+            {/* Lighting — brighter diffuse for visibility without lag */}
+            <ambientLight intensity={0.55} color="#445577" />
             <directionalLight
                 position={[40, 70, 30]}
-                intensity={0.9}
+                intensity={1.2}
                 color="#fff5e0"
                 castShadow
                 shadow-mapSize={[1024, 1024]}
@@ -200,7 +210,7 @@ export default function GameScene() {
             {/* Moonlight fill from opposite */}
             <directionalLight
                 position={[-30, 40, -40]}
-                intensity={0.25}
+                intensity={0.4}
                 color="#aabbff"
             />
 
@@ -231,7 +241,7 @@ export default function GameScene() {
             {/* Camera */}
             <GameCamera />
 
-            {/* === Atlas Robot Player ΓÇö RESERVED (not yet added) ===
+            {/* === Atlas Robot Player — RESERVED (not yet added) ===
             // Compatible with the collective's intent queue system.
             // Team health bar hook: useGameStore.getState().atlasHp
             // Targeting: shares zombies array, separate teammate aggro.
@@ -241,3 +251,4 @@ export default function GameScene() {
         </group>
     );
 }
+

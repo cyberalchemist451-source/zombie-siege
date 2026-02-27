@@ -1,6 +1,6 @@
 ﻿import { create } from 'zustand';
 
-/* ΓöÇΓöÇΓöÇ Types ΓöÇΓöÇΓöÇ */
+/* ─── Types ─── */
 
 export interface Vec3 {
     x: number;
@@ -272,13 +272,13 @@ export interface SimulationStore {
     setUserPosition: (position: Vec3) => void;
 }
 
-/* ΓöÇΓöÇΓöÇ Default environment ΓöÇΓöÇΓöÇ */
+/* ─── Default environment ─── */
 
 export const DEFAULT_ENVIRONMENT: EnvironmentConfig = {
     id: 'default-field',
     name: 'Qualia Field',
     terrain: {
-        size: 142,   // ~142m x 142m Γëê 5 acres
+        size: 142,   // ~142m x 142m ≈ 5 acres
         seed: 42,
         heightScale: 6,
         grassDensity: 1500,
@@ -305,7 +305,7 @@ export const DEFAULT_ENVIRONMENT: EnvironmentConfig = {
     portals: [],
 };
 
-/* ΓöÇΓöÇΓöÇ Store ΓöÇΓöÇΓöÇ */
+/* ─── Store ─── */
 
 export const useSimulationStore = create<SimulationStore>((set, get) => ({
     environment: DEFAULT_ENVIRONMENT,
@@ -646,3 +646,4 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         }
     })),
 }));
+

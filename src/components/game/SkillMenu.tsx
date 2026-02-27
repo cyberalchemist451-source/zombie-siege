@@ -15,31 +15,31 @@ interface UpgradeDef {
 
 const UPGRADES: UpgradeDef[] = [
     {
-        key: 'maxHp', icon: 'Γ¥ñ∩╕Å', label: 'Fortitude', description: '+25 Max HP per tier (full heal on upgrade)', color: '#44cc88',
+        key: 'maxHp', icon: '❤️', label: 'Fortitude', description: '+25 Max HP per tier (full heal on upgrade)', color: '#44cc88',
         getLevel: s => s.player.upgrades.maxHp
     },
     {
-        key: 'damage', icon: '≡ƒÅ╣', label: 'Precision', description: '+10 Crossbow & spell damage per tier', color: '#cc6644',
+        key: 'damage', icon: '🏹', label: 'Precision', description: '+10 Crossbow & spell damage per tier', color: '#cc6644',
         getLevel: s => s.player.upgrades.damage
     },
     {
-        key: 'speed', icon: '≡ƒÆ¿', label: 'Swiftness', description: '+0.5 move speed per tier (walk & sprint)', color: '#44aaff',
+        key: 'speed', icon: '💨', label: 'Swiftness', description: '+0.5 move speed per tier (walk & sprint)', color: '#44aaff',
         getLevel: s => s.player.upgrades.speed
     },
     {
-        key: 'fireball', icon: '≡ƒöÑ', label: 'Fireball', description: 'Unlock & upgrade fireball. AOE unlocks at tier 3 (key 1)', color: '#ff6600',
+        key: 'fireball', icon: '🔥', label: 'Fireball', description: 'Unlock & upgrade fireball. AOE unlocks at tier 3 (key 1)', color: '#ff6600',
         getLevel: s => s.player.spells.fireball.tier
     },
     {
-        key: 'lightning', icon: 'ΓÜí', label: 'Lightning', description: 'Unlock & upgrade lightning. Chains to enemies at tier 3 (key 2)', color: '#4488ff',
+        key: 'lightning', icon: '⚡', label: 'Lightning', description: 'Unlock & upgrade lightning. Chains to enemies at tier 3 (key 2)', color: '#4488ff',
         getLevel: s => s.player.spells.lightning.tier
     },
     {
-        key: 'frostbolt', icon: 'Γ¥ä∩╕Å', label: 'Frostbolt', description: 'Unlock & upgrade frostbolt. AOE chill unlocks at tier 3 (key 3)', color: '#44bbff',
+        key: 'frostbolt', icon: '❄️', label: 'Frostbolt', description: 'Unlock & upgrade frostbolt. AOE chill unlocks at tier 3 (key 3)', color: '#44bbff',
         getLevel: s => s.player.spells.frostbolt.tier
     },
     {
-        key: 'shadowbolt', icon: '≡ƒîæ', label: 'Shadowbolt', description: 'Unlock & upgrade DOT bolt. Spreads on kill. AOE DOT at tier 3 (key 4)', color: '#9900ff',
+        key: 'shadowbolt', icon: '🌑', label: 'Shadowbolt', description: 'Unlock & upgrade DOT bolt. Spreads on kill. AOE DOT at tier 3 (key 4)', color: '#9900ff',
         getLevel: s => s.player.spells.shadowbolt.tier
     },
 ];
@@ -89,8 +89,8 @@ export default function SkillMenu() {
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
                     <div>
-                        <div style={{ color: '#eee', fontSize: 19, fontWeight: 800 }}>Γ¡É Skill Tree</div>
-                        <div style={{ color: '#888', fontSize: 12, marginTop: 2 }}>Level {player.level} ┬╖ {player.xp}/100 XP ┬╖ Max tier {MAX}</div>
+                        <div style={{ color: '#eee', fontSize: 19, fontWeight: 800 }}>⭐ Skill Tree</div>
+                        <div style={{ color: '#888', fontSize: 12, marginTop: 2 }}>Level {player.level} · {player.xp}/100 XP · Max tier {MAX}</div>
                     </div>
                     <div style={{
                         background: player.skillPoints > 0 ? 'rgba(255,200,0,0.15)' : 'rgba(40,40,40,0.5)',
@@ -135,7 +135,7 @@ export default function SkillMenu() {
                                         cursor: canUpgrade ? 'pointer' : 'not-allowed', flexShrink: 0,
                                         transition: 'all 0.15s',
                                     }}
-                                >{maxed ? 'MAX' : 'Γåæ Up'}</button>
+                                >{maxed ? 'MAX' : '↑ Up'}</button>
                             </div>
                         );
                     })}
@@ -147,3 +147,4 @@ export default function SkillMenu() {
         </div>
     );
 }
+

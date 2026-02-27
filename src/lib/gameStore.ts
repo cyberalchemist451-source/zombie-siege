@@ -1,7 +1,7 @@
 ﻿import { create } from 'zustand';
 
 export type WeaponType = 'bow';
-export type ZombieType = 'normal' | 'brute';
+export type ZombieType = 'normal' | 'brute' | 'boss';
 export type SpellType = 'fireball' | 'lightning' | 'frostbolt' | 'shadowbolt';
 export type ZombieState = 'chasing' | 'attacking' | 'stunned' | 'dying' | 'dead';
 
@@ -73,6 +73,7 @@ export interface GameStore {
     gameRunning: boolean; gameOver: boolean; gamePaused: boolean;
     skillMenuOpen: boolean; targetedZombieId: string | null;
     damageNumbers: { id: string; position: Vec3; amount: number; type: 'player' | 'zombie'; timestamp: number }[];
+    useArrowKeys: boolean;
 
     setActiveWeapon: (w: WeaponType) => void;
     setBlocking: (b: boolean) => void;
@@ -101,6 +102,7 @@ export interface GameStore {
     checkWaveComplete: () => void; tickWaveTimer: (dt: number) => void;
     tickWaveSpawner: (dt: number) => void;
     pauseGame: () => void; resumeGame: () => void; togglePause: () => void;
+    toggleArrowKeys: () => void;
 
     setTargetedZombie: (id: string | null) => void;
     toggleSkillMenu: () => void; setSkillMenuOpen: (open: boolean) => void;
@@ -108,14 +110,14 @@ export interface GameStore {
     clearOldDamageNumbers: () => void;
 }
 
-/* ΓöÇΓöÇ Constants ΓöÇΓöÇ */
+/* ── Constants ── */
 export const XP_PER_LEVEL = 100;
 export const XP_PER_KILL = 20;
 export const MAX_SKILL_TIER = 10;
 export const WEAPON_DAMAGE: Record<WeaponType, number> = { bow: 35 };
 export const WEAPON_COOLDOWN: Record<WeaponType, number> = { bow: 0.7 };
 const SPAWN_BATCH_SIZE = 20;    // max enemies spawned per batch
-const SPAWN_BATCH_INTERVAL = 40; // seconds between batches
+const SPAWN_BATCH_INTERVAL = 15; // seconds between batches
 
 export const SPELL_BASE_DAMAGE: Record<SpellType, number> = {
     fireball: 40, lightning: 60, frostbolt: 25, shadowbolt: 20,
@@ -136,10 +138,12 @@ const DOT_TICK_INTERVAL = 0.5;
 function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
 
 function zombiesForWave(wave: number) {
-    return wave <= 6 ? 5 + wave * 3 : Math.round(5 + wave * 3 + (wave - 6) * 4);
+    if (wave % 5 === 0) return 1; // Boss wave
+    return wave <= 6 ? 5 + wave * 2 : Math.round(17 + (wave - 6) * 2.5);
 }
 function bruteCountForWave(wave: number) {
-    return wave < 7 ? 0 : Math.min(Math.floor((wave - 6) * 1.5), 8);
+    if (wave % 5 === 0) return 0;
+    return wave < 7 ? 0 : Math.min(Math.floor((wave - 6) * 1.0), 5);
 }
 
 function initialPlayer(): PlayerState {
@@ -157,7 +161,10 @@ function initialPlayer(): PlayerState {
     };
 }
 
-function makeSpawnEntries(count: number, brutes: number): { position: Vec3; type: ZombieType }[] {
+function makeSpawnEntries(count: number, brutes: number, waveNum: number): { position: Vec3; type: ZombieType }[] {
+    if (waveNum % 5 === 0) {
+        return [{ position: { x: CAVE_POSITION.x, y: 0, z: CAVE_POSITION.z }, type: 'boss' }];
+    }
     return Array.from({ length: count }, (_, i) => {
         const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
         const radius = 3 + Math.random() * 7;
@@ -168,7 +175,7 @@ function makeSpawnEntries(count: number, brutes: number): { position: Vec3; type
     });
 }
 
-/* ΓöÇΓöÇ Store ΓöÇΓöÇ */
+/* ── Store ── */
 const initialWave = (): WaveState => ({
     number: 0, phase: 'waiting', zombiesRemaining: 0, restTimer: 0, totalSpawned: 0,
     pendingSpawns: 0, spawnBatchTimer: 0, pendingEntries: [],
@@ -180,6 +187,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     wave: initialWave(),
     gameRunning: false, gameOver: false, gamePaused: false, skillMenuOpen: false,
     targetedZombieId: null, damageNumbers: [],
+    useArrowKeys: false,
 
     setActiveWeapon: w => set(s => ({ player: { ...s.player, activeWeapon: w } })),
     setBlocking: b => set(s => ({ player: { ...s.player, isBlocking: b } })),
@@ -235,13 +243,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })),
 
     spawnZombies: entries => {
-        const newZombies: ZombieData[] = entries.map(e => ({
-            id: uid(), position: { ...e.position }, rotation: Math.random() * Math.PI * 2,
-            type: e.type,
-            hp: e.type === 'brute' ? BRUTE_HP : NORMAL_HP,
-            maxHp: e.type === 'brute' ? BRUTE_HP : NORMAL_HP,
-            state: 'chasing', stunTimer: 0, slowTimer: 0, attackCooldown: 0, dotEffects: [],
-        }));
+        const { wave } = get();
+        const newZombies: ZombieData[] = entries.map(e => {
+            let hp = NORMAL_HP;
+            if (e.type === 'brute') hp = BRUTE_HP;
+            if (e.type === 'boss') hp = 2500 * Math.max(1, wave.number / 5);
+            return {
+                id: uid(), position: { ...e.position }, rotation: Math.random() * Math.PI * 2,
+                type: e.type,
+                hp,
+                maxHp: hp,
+                state: 'chasing', stunTimer: 0, slowTimer: 0, attackCooldown: 0, dotEffects: [],
+            };
+        });
         set(s => ({
             zombies: [...s.zombies.filter(z => z.state !== 'dead'), ...newZombies],
             wave: { ...s.wave, zombiesRemaining: s.wave.zombiesRemaining + entries.length, totalSpawned: s.wave.totalSpawned + entries.length },
@@ -257,9 +271,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const hp = Math.max(0, zombie.hp - amount);
         const isDying = hp <= 0;
         const updates: Partial<ZombieData> = { hp };
-        if (effect === 'stun' && !isDying) updates.stunTimer = 1.5;
+        if (effect === 'stun' && !isDying && zombie.type !== 'boss') updates.stunTimer = 1.5;
         if (effect === 'slow' && !isDying) updates.slowTimer = 3;
-        if (isDying) { updates.state = 'dying'; get().gainXP(zombie.type === 'brute' ? XP_PER_KILL * 3 : XP_PER_KILL); }
+        if (isDying) {
+            updates.state = 'dying';
+            const xp = zombie.type === 'boss' ? XP_PER_KILL * 50 : (zombie.type === 'brute' ? XP_PER_KILL * 3 : XP_PER_KILL);
+            get().gainXP(xp);
+        }
         const newZombies = zombies.map((z, i) => i === idx ? { ...z, ...updates } : z);
         set({ zombies: newZombies });
         if (isDying) {
@@ -339,7 +357,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             const dx = playerPos.x - position.x, dz = playerPos.z - position.z;
             const dist = Math.sqrt(dx * dx + dz * dz);
-            const baseSpeed = zombie.type === 'brute' ? BRUTE_SPD : NORMAL_SPD;
+
+            let baseSpeed = NORMAL_SPD;
+            if (zombie.type === 'brute') baseSpeed = BRUTE_SPD;
+            if (zombie.type === 'boss') baseSpeed = 1.0;
             const spd = slowTimer > 0 ? baseSpeed * 0.5 : baseSpeed;
 
             if (dist > ATTACK_RANGE) {
@@ -357,8 +378,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
             } else {
                 state = 'attacking';
                 if (attackCooldown <= 0) {
-                    attackCooldown = zombie.type === 'brute' ? 2.0 : 1.5;
-                    get().damagePlayer(zombie.type === 'brute' ? BRUTE_DMG : NORMAL_DMG);
+                    let cd = 1.5, dmg = NORMAL_DMG;
+                    if (zombie.type === 'brute') { cd = 2.0; dmg = BRUTE_DMG; }
+                    if (zombie.type === 'boss') { cd = 3.0; dmg = 80; }
+
+                    attackCooldown = cd;
+                    get().damagePlayer(dmg);
                 }
             }
             return { ...zombie, hp, dotEffects, position, rotation, stunTimer, slowTimer, attackCooldown, state };
@@ -368,7 +393,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // Handle DOT deaths post-set
         for (const { zombie } of died) {
-            get().gainXP(zombie.type === 'brute' ? XP_PER_KILL * 3 : XP_PER_KILL);
+            const xp = zombie.type === 'boss' ? XP_PER_KILL * 50 : (zombie.type === 'brute' ? XP_PER_KILL * 3 : XP_PER_KILL);
+            get().gainXP(xp);
             const nonSpreadDots = zombie.dotEffects.filter(d => !d.isSpread);
             if (nonSpreadDots.length > 0) get().spreadDotFromPosition(zombie.position, nonSpreadDots[0]);
             set(s => ({ wave: { ...s.wave, zombiesRemaining: Math.max(0, s.wave.zombiesRemaining - 1) } }));
@@ -482,7 +508,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const waveNum = 1;
         const total = zombiesForWave(waveNum);
         const brutes = bruteCountForWave(waveNum);
-        const allEntries = makeSpawnEntries(total, brutes);
+        const allEntries = makeSpawnEntries(total, brutes, waveNum);
         const firstBatch = allEntries.slice(0, SPAWN_BATCH_SIZE);
         const rest = allEntries.slice(SPAWN_BATCH_SIZE);
         set({
@@ -500,7 +526,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const waveNum = get().wave.number + 1;
         const total = zombiesForWave(waveNum);
         const brutes = bruteCountForWave(waveNum);
-        const allEntries = makeSpawnEntries(total, brutes);
+        const allEntries = makeSpawnEntries(total, brutes, waveNum);
         const firstBatch = allEntries.slice(0, SPAWN_BATCH_SIZE);
         const rest = allEntries.slice(SPAWN_BATCH_SIZE);
         set(s => ({
@@ -553,6 +579,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     pauseGame: () => set({ gamePaused: true }),
     resumeGame: () => set({ gamePaused: false }),
     togglePause: () => set(s => ({ gamePaused: !s.gamePaused })),
+    toggleArrowKeys: () => set(s => ({ useArrowKeys: !s.useArrowKeys })),
 
     setTargetedZombie: id => set({ targetedZombieId: id }),
     toggleSkillMenu: () => set(s => ({ skillMenuOpen: !s.skillMenuOpen })),
@@ -560,3 +587,4 @@ export const useGameStore = create<GameStore>((set, get) => ({
     addDamageNumber: (position, amount, type) => set(s => ({ damageNumbers: [...s.damageNumbers, { id: uid(), position, amount, type, timestamp: Date.now() }] })),
     clearOldDamageNumbers: () => { const now = Date.now(); set(s => ({ damageNumbers: s.damageNumbers.filter(d => now - d.timestamp < 1200) })); },
 }));
+

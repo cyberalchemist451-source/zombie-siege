@@ -22,6 +22,8 @@ export default function GameHUD() {
     const zombies = useGameStore(s => s.zombies);
     const toggleSkillMenu = useGameStore(s => s.toggleSkillMenu);
     const skillMenuOpen = useGameStore(s => s.skillMenuOpen);
+    const useArrowKeys = useGameStore(s => s.useArrowKeys);
+    const toggleArrowKeys = useGameStore(s => s.toggleArrowKeys);
     const togglePause = useGameStore(s => s.togglePause);
 
     // Keyboard shortcut: P to pause/resume
@@ -48,7 +50,7 @@ export default function GameHUD() {
             fontFamily: "'Inter', 'Segoe UI', sans-serif",
             userSelect: 'none',
         }}>
-            {/* ΓöÇΓöÇ TOP LEFT: HP + XP ΓöÇΓöÇ */}
+            {/* ── TOP LEFT: HP + XP ── */}
             <div style={{ position: 'absolute', top: 18, left: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {/* HP Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -108,9 +110,13 @@ export default function GameHUD() {
                     </>
                 ) : wave.phase === 'active' ? (
                     <>
-                        <div style={{ color: '#ff6622', fontSize: 14, fontWeight: 800, letterSpacing: 1 }}>⚔️ WAVE {wave.number}</div>
-                        <div style={{ color: '#ffaaaa', fontSize: 12 }}>🧟 {wave.zombiesRemaining} remaining</div>
-                        {wave.pendingSpawns > 0 && (
+                        <div style={{ color: wave.number % 5 === 0 ? '#ff2244' : '#ff6622', fontSize: 14, fontWeight: 800, letterSpacing: 1 }}>
+                            {wave.number % 5 === 0 ? `🦑 BOSS WAVE ${wave.number}` : `⚔️ WAVE ${wave.number}`}
+                        </div>
+                        <div style={{ color: '#ffaaaa', fontSize: 12 }}>
+                            {wave.number % 5 === 0 ? '🐙 The Abyss has awakened...' : `🧟 ${wave.zombiesRemaining} remaining`}
+                        </div>
+                        {wave.pendingSpawns > 0 && wave.number % 5 !== 0 && (
                             <div style={{ color: '#ffcc66', fontSize: 11, marginTop: 1 }}>
                                 +{wave.pendingSpawns} incoming in {Math.ceil(wave.spawnBatchTimer)}s
                             </div>
@@ -230,6 +236,22 @@ export default function GameHUD() {
                 </button>
             </div>
 
+            {/* ── BOTTOM RIGHT / ACCESSIBILITY ── */}
+            <div style={{ position: 'absolute', bottom: 18, right: 18, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+                { /* Controls Toggle */}
+                <button
+                    onClick={toggleArrowKeys}
+                    style={{
+                        pointerEvents: 'auto', background: 'rgba(0,0,0,0.6)', border: '1px solid #444', color: '#aaa',
+                        borderRadius: 12, padding: '8px 12px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                        backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', gap: 6,
+                    }}
+                >
+                    <span style={{ fontSize: 14 }}>{useArrowKeys ? '⌨️' : '🎮'}</span>
+                    Movement: {useArrowKeys ? 'Arrow Keys' : 'WASD'}
+                </button>
+            </div>
+
             {/* PAUSED OVERLAY */}
             {gamePaused && !gameOver && (
                 <div style={{
@@ -258,7 +280,7 @@ export default function GameHUD() {
                 </div>
             )}
 
-            {/* ΓöÇΓöÇ GAME OVER ΓöÇΓöÇ */}
+            {/* ── GAME OVER ── */}
             {gameOver && (
                 <div style={{
                     position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column',
@@ -290,4 +312,5 @@ export default function GameHUD() {
         </div>
     );
 }
+
 
