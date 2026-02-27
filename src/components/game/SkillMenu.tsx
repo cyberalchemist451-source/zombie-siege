@@ -82,7 +82,8 @@ export default function SkillMenu() {
         >
             <div style={{
                 background: 'rgba(8,12,28,0.97)', border: '1px solid rgba(100,130,255,0.3)',
-                borderRadius: 20, padding: '26px 30px', minWidth: 440,
+                borderRadius: 20, padding: '24px 20px', width: '90%', maxWidth: 460,
+                maxHeight: '90vh', display: 'flex', flexDirection: 'column',
                 backdropFilter: 'blur(18px)', boxShadow: '0 8px 60px rgba(0,0,100,0.4)',
                 fontFamily: "'Inter','Segoe UI',sans-serif",
             }}>
@@ -103,7 +104,7 @@ export default function SkillMenu() {
                 </div>
 
                 {/* Upgrades */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9, overflowY: 'auto', paddingRight: 4, paddingBottom: 4 }}>
                     {UPGRADES.map(upg => {
                         const current = upg.getLevel(storeState);
                         const maxed = current >= MAX;
@@ -140,8 +141,21 @@ export default function SkillMenu() {
                         );
                     })}
                 </div>
-                <div style={{ marginTop: 16, textAlign: 'center', color: '#444', fontSize: 10 }}>
-                    Click outside to close ┬╖ Earn points by leveling up
+                <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ color: '#444', fontSize: 11 }}>
+                        Click outside to close · Earn points by leveling up
+                    </div>
+                    <button
+                        onClick={() => setSkillMenuOpen(false)}
+                        onTouchStart={(e) => { e.preventDefault(); setSkillMenuOpen(false); }}
+                        style={{
+                            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                            color: '#ccc', borderRadius: 8, padding: '8px 20px', fontSize: 14,
+                            fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                    >
+                        Close
+                    </button>
                 </div>
             </div>
         </div>

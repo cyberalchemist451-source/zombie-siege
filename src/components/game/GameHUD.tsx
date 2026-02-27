@@ -186,7 +186,9 @@ export default function GameHUD() {
                                     }} />
                                 )}
                                 <span style={{ fontSize: 24, position: 'relative', zIndex: 1 }}>{meta.icon}</span>
-                                <span style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 9, color: '#aaaaff', fontWeight: 700 }}>{meta.key}</span>
+                                {!isTouch && (
+                                    <span style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 9, color: '#aaaaff', fontWeight: 700 }}>{meta.key}</span>
+                                )}
                                 {spellData.tier > 0 && (
                                     <span style={{ position: 'absolute', top: 2, right: 3, fontSize: 8, color: '#ffdd44' }}>
                                         {'★'.repeat(Math.min(spellData.tier, 5))}
@@ -221,7 +223,7 @@ export default function GameHUD() {
                 <button
                     onClick={togglePause}
                     onTouchStart={(e) => { e.preventDefault(); togglePause(); }}
-                    title="Pause / Resume (P)"
+                    title={!isTouch ? "Pause / Resume (P)" : undefined}
                     style={{
                         background: gamePaused ? 'rgba(255,200,0,0.2)' : 'rgba(0,0,0,0.6)',
                         border: gamePaused ? '1px solid #ffcc00' : '1px solid rgba(255,255,255,0.2)',
