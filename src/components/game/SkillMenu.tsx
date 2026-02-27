@@ -128,6 +128,7 @@ export default function SkillMenu() {
                                 <button
                                     disabled={!canUpgrade}
                                     onClick={() => spendSkillPoint(upg.key)}
+                                    onTouchStart={(e) => { e.preventDefault(); if (canUpgrade) spendSkillPoint(upg.key); }}
                                     style={{
                                         background: canUpgrade ? 'rgba(80,120,255,0.2)' : 'rgba(40,40,40,0.4)',
                                         border: canUpgrade ? '1px solid rgba(100,140,255,0.6)' : '1px solid #333',

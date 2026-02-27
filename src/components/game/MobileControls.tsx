@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useGameStore } from '@/lib/gameStore';
 
 function dispatchKey(key: string, isDown: boolean) {
     window.dispatchEvent(new KeyboardEvent(isDown ? 'keydown' : 'keyup', { key }));
@@ -11,6 +12,7 @@ function dispatchClick() {
 }
 
 export default function MobileControls() {
+    const player = useGameStore(s => s.player);
     const [isTouchTarget, setIsTouchTarget] = useState(false);
     const [joyPos, setJoyPos] = useState({ x: 0, y: 0 });
     const joyBaseRef = useRef<HTMLDivElement>(null);
@@ -145,32 +147,25 @@ export default function MobileControls() {
             {/* Action Buttons (Right Side) */}
             <div style={{
                 position: 'absolute', bottom: 40, right: 40,
-                display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 15, pointerEvents: 'auto'
+                display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 15, pointerEvents: 'auto'
             }}>
                 {/* Top row: Spells */}
-                <div style={{ gridColumn: '1', gridRow: '1' }}>
-                    <ActionButton icon="🔥" label="1" onDown={() => { dispatchKey('1', true); dispatchKey('1', false); }} color="#ff6644" />
-                </div>
-                <div style={{ gridColumn: '2', gridRow: '1' }}>
-                    <ActionButton icon="⚡" label="2" onDown={() => { dispatchKey('2', true); dispatchKey('2', false); }} color="#aabbff" />
-                </div>
-                <div style={{ gridColumn: '3', gridRow: '1' }}>
-                    <ActionButton icon="❄️" label="3" onDown={() => { dispatchKey('3', true); dispatchKey('3', false); }} color="#44ccff" />
+                <div style={{ display: 'flex', gap: 15, justifyContent: 'flex-end', flexWrap: 'wrap', maxWidth: 280 }}>
+                    {player.spells.fireball.unlocked && <ActionButton icon="🔥" onDown={() => { dispatchKey('1', true); dispatchKey('1', false); }} color="#ff6644" />}
+                    {player.spells.lightning.unlocked && <ActionButton icon="⚡" onDown={() => { dispatchKey('2', true); dispatchKey('2', false); }} color="#aabbff" />}
+                    {player.spells.frostbolt.unlocked && <ActionButton icon="❄️" onDown={() => { dispatchKey('3', true); dispatchKey('3', false); }} color="#44ccff" />}
+                    {player.spells.shadowbolt.unlocked && <ActionButton icon="🌑" onDown={() => { dispatchKey('4', true); dispatchKey('4', false); }} color="#9900ff" />}
                 </div>
 
                 {/* Bottom row: Utilities and Attack */}
-                <div style={{ gridColumn: '1', gridRow: '2', display: 'flex', alignItems: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: 15, alignItems: 'flex-end', justifyContent: 'flex-end' }}>
                     <ActionButton icon="🏃" label="Sprint"
                         onDown={() => dispatchKey('shift', true)}
                         onUp={() => dispatchKey('shift', false)}
                         color="#ffcc00" size={45} />
-                </div>
-                <div style={{ gridColumn: '2', gridRow: '2', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
                     <ActionButton icon="🎯" label="Lock"
                         onDown={() => { dispatchKey('tab', true); dispatchKey('tab', false); }}
                         color="#ff0044" size={55} />
-                </div>
-                <div style={{ gridColumn: '3', gridRow: '2', display: 'flex', alignItems: 'flex-end' }}>
                     <ActionButton icon="🏹" label="Attack"
                         onDown={dispatchClick}
                         color="#44ff44" size={65} />
