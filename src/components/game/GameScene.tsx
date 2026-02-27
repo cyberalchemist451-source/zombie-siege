@@ -11,6 +11,7 @@ import ZombieEntity from './ZombieEntity';
 import ZombieWaveManager from './ZombieWaveManager';
 import CaveSpawner from './CaveSpawner';
 import ProjectileSystem from './ProjectileSystem';
+import { Sky, Environment } from '@react-three/drei';
 
 // Shared camera lock state (read by HUD)
 export const cameraState = {
@@ -189,8 +190,17 @@ export default function GameScene() {
     return (
         <group>
             {/* Environment / Sky / Fog */}
-            <color attach="background" args={['#1a2035']} />
+            <Sky
+                distance={450000}
+                sunPosition={[40, 70, 30]}
+                inclination={0.6}
+                azimuth={0.1}
+                rayleigh={0.5}
+                turbidity={10}
+                mieCoefficient={0.005}
+            />
             <fog attach="fog" args={['#1a2035', 15, 80]} />
+            <Environment preset="night" />
 
             {/* Cave Backdrop Wall (2D stone wall behind cave to block void) */}
             <mesh position={[-60, 10, -60]} rotation={[0, Math.PI / 4, 0]}>
