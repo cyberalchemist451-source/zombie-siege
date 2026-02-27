@@ -10,6 +10,7 @@ import PlayerAvatar from './PlayerAvatar';
 import ZombieEntity from './ZombieEntity';
 import ZombieWaveManager from './ZombieWaveManager';
 import CastleSpawner from './CastleSpawner';
+import ForestBackdrop from './ForestBackdrop';
 import ProjectileSystem from './ProjectileSystem';
 import { Sky, Environment } from '@react-three/drei';
 
@@ -222,6 +223,7 @@ export default function GameScene() {
             <Terrain />
 
             {/* Scenery */}
+            <ForestBackdrop />
             <SceneryTrees />
             <SceneryRocks />
 
