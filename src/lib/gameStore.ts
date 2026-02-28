@@ -388,7 +388,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     get().addProjectile({
                         type: 'boss_bolt', position: { x: position.x, y: 1.8, z: position.z },
                         direction: { x: nx, y: 0, z: nz },
-                        speed: 5.5, damage: 50, ttl: 8, hitRadius: 1.0, ownerId: 'enemy'
+                        speed: 3.5, damage: 50, ttl: 12, hitRadius: 1.0, ownerId: 'enemy'
                     });
                 }
             } else {

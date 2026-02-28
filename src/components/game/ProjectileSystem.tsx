@@ -64,12 +64,12 @@ function Arrow({ proj }: { proj: ProjectileData }) {
 function BossBolt({ proj }: { proj: ProjectileData }) {
     const meshRef = useRef<THREE.Mesh>(null);
     useFrame(({ clock }) => {
-        if (meshRef.current) { meshRef.current.rotation.x -= 0.05; meshRef.current.rotation.z -= 0.05; meshRef.current.scale.setScalar(1.2 + Math.sin(clock.elapsedTime * 6) * 0.2); }
+        if (meshRef.current) { meshRef.current.rotation.x -= 0.05; meshRef.current.rotation.z -= 0.05; meshRef.current.scale.setScalar(2.0 + Math.sin(clock.elapsedTime * 6) * 0.4); }
     });
     return (
         <group position={[proj.position.x, proj.position.y, proj.position.z]}>
-            <mesh ref={meshRef}><octahedronGeometry args={[0.3, 0]} /><meshStandardMaterial color="#aa00ff" emissive="#cc33ff" emissiveIntensity={2.0} /></mesh>
-            <pointLight color="#dd66ff" intensity={5} distance={8} decay={2} />
+            <mesh ref={meshRef}><octahedronGeometry args={[0.4, 0]} /><meshStandardMaterial color="#aa00ff" emissive="#cc33ff" emissiveIntensity={2.0} /></mesh>
+            <pointLight color="#dd66ff" intensity={8} distance={12} decay={2} />
         </group>
     );
 }

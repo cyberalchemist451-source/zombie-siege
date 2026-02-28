@@ -20,6 +20,8 @@ export default function CastleSpawner() {
             environment.terrain.heightScale
         );
         mountRef.current.position.set(CAVE_POSITION.x, terrainY, CAVE_POSITION.z);
+        // Face the drawbridge towards the player starting origin (0,0)
+        mountRef.current.rotation.y = Math.atan2(-CAVE_POSITION.x, -CAVE_POSITION.z);
     }, [environment]);
 
     // Animated torch light or glow from inside
@@ -34,7 +36,7 @@ export default function CastleSpawner() {
         <group ref={mountRef}>
             <group scale={[2, 2, 2]}>
                 {/* Drawbridge extending outwards over ground */}
-                <mesh position={[0, 0.1, 4]} rotation={[-0.1, 0, 0]} receiveShadow castShadow>
+                <mesh position={[0, 0.1, 4]} rotation={[0, 0, 0]} receiveShadow castShadow>
                     <boxGeometry args={[4, 0.2, 8]} />
                     <meshStandardMaterial color="#3a2510" roughness={0.9} /> {/* Dark wood */}
                 </mesh>

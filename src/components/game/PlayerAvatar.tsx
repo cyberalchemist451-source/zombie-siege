@@ -364,11 +364,34 @@ export default function PlayerAvatar() {
                 <mesh position={[0, -0.44, 0]} castShadow><cylinderGeometry args={[0.065, 0.075, 0.24, 7]} /><meshStandardMaterial {...PLATE_D} /></mesh>
                 <mesh position={[0, -0.60, 0]}><boxGeometry args={[0.12, 0.12, 0.10]} /><meshStandardMaterial {...PLATE} /></mesh>
                 {/* Crossbow */}
-                <group position={[0.05, -0.38, 0.06]} rotation={[0.12, 0, 0.14]}>
-                    <mesh><torusGeometry args={[0.28, 0.020, 6, 20, Math.PI * 1.35]} /><meshStandardMaterial color="#4a2a08" roughness={0.8} /></mesh>
-                    <mesh><cylinderGeometry args={[0.004, 0.004, 0.55, 4]} /><meshStandardMaterial color="#c8aa70" /></mesh>
-                    <mesh position={[0, 0, -0.04]} rotation={[Math.PI / 2, 0, 0]}>
-                        <cylinderGeometry args={[0.007, 0.007, 0.46, 4]} /><meshStandardMaterial color="#8a6030" />
+                <group position={[0.05, -0.42, 0.12]} rotation={[0.1, 0, 0]}>
+                    {/* Main Stock */}
+                    <mesh position={[0, 0, -0.1]}>
+                        <boxGeometry args={[0.08, 0.6, 0.1]} />
+                        <meshStandardMaterial color="#2d1c10" roughness={0.9} />
+                    </mesh>
+                    {/* Metal Prod / Bow arms */}
+                    <mesh position={[0, 0.2, -0.1]} rotation={[0, 0, Math.PI / 2]}>
+                        <cylinderGeometry args={[0.02, 0.02, 0.7, 8]} />
+                        <meshStandardMaterial color="#6a7588" metalness={0.9} roughness={0.2} />
+                    </mesh>
+                    {/* String */}
+                    <mesh position={[-0.175, 0.05, -0.1]} rotation={[0, 0, -0.4]}>
+                        <cylinderGeometry args={[0.003, 0.003, 0.4, 4]} />
+                        <meshStandardMaterial color="#c8aa70" />
+                    </mesh>
+                    <mesh position={[0.175, 0.05, -0.1]} rotation={[0, 0, 0.4]}>
+                        <cylinderGeometry args={[0.003, 0.003, 0.4, 4]} />
+                        <meshStandardMaterial color="#c8aa70" />
+                    </mesh>
+                    {/* Loaded Bolt/Arrow */}
+                    <mesh position={[0, 0.1, -0.06]}>
+                        <cylinderGeometry args={[0.01, 0.01, 0.35, 4]} />
+                        <meshStandardMaterial color="#5a3a10" roughness={0.8} />
+                    </mesh>
+                    <mesh position={[0, 0.28, -0.06]}>
+                        <coneGeometry args={[0.02, 0.08, 4]} />
+                        <meshStandardMaterial color="#ccc" metalness={0.8} />
                     </mesh>
                 </group>
             </group>
